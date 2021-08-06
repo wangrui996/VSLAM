@@ -6,7 +6,7 @@ SLAM学习过程记录
   <summary>目录</summary>
   <ol>
     <li>
-      <a href="#SLAM基础知识">SLAM基础知识</a>
+      <a href="#1 SLAM基础知识">1 SLAM基础知识</a>
       <ul>
         <li><a href="#1.1 卡方">1.1 卡方</a></li>
       </ul>
@@ -33,7 +33,7 @@ SLAM学习过程记录
 
 
 
-## SLAM基础知识
+## 1 SLAM基础知识
 
 
 
