@@ -1,8 +1,7 @@
 # VSLAM
 SLAM学习过程记录
-
-* [<a id="user\-content\-1slam基础知识" href="\#1slam%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"></a>1\.SLAM基础知识](#1slam基础知识)
-    * [<a id="user\-content\-11\-卡方检验" href="\#11\-%E5%8D%A1%E6%96%B9%E6%A3%80%E9%AA%8C"></a>1\.1 卡方检验](#11-卡方检验)
+* [1\.SLAM基础知识](#1\.SLAM基础知识)
+  * [1\.1卡方检验](#1\.1卡方检验)
 
 ## 1.SLAM基础知识
 ### 1.1 卡方检验
