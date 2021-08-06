@@ -1,7 +1,7 @@
 # VSLAM
 SLAM学习过程记录
 
-* [1SLAM基础知识](#1 SLAM基础知识)
+* [1SLAM基础知识](#1SLAM基础知识)
 
 
 ## 1SLAM基础知识
