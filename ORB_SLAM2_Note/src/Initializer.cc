@@ -403,8 +403,8 @@ void Initializer::FindFundamental(vector<bool> &vbMatchesInliers, float &score, 
 
         // 基础矩阵约束：p2^t*F21*p1 = 0，其中p1,p2 为齐次化特征点坐标    
         // 特征点归一化：vPn1 = T1 * mvKeys1, vPn2 = T2 * mvKeys2  
-        // 根据基础矩阵约束得到:(T2 * mvKeys2)^t* Hn * T1 * mvKeys1 = 0   
-        // 进一步得到:mvKeys2^t * T2^t * Hn * T1 * mvKeys1 = 0
+        // 根据基础矩阵约束得到:(T2 * mvKeys2)^t* Fn * T1 * mvKeys1 = 0   
+        // 进一步得到:mvKeys2^t * T2^t * n * T1 * mvKeys1 = 0
         F21i = T2t*Fn*T1;
 
         // Step 4 利用重投影误差为当次RANSAC的结果评分
@@ -587,9 +587,9 @@ float Initializer::CheckHomography(
     vector<bool> &vbMatchesInliers,     //匹配好的特征点对的Inliers标记
     float sigma)                        //估计误差
 {
-    // 说明：在已值n维观测数据误差服从N(0，sigma）的高斯分布时
+    // 说明：在已知n维观测数据误差服从N(0，sigma）的高斯分布时
     // 其误差加权最小二乘结果为  sum_error = SUM(e(i)^T * Q^(-1) * e(i))
-    // 其中：e(i) = [e_x,e_y,...]^T, Q维观测数据协方差矩阵，即sigma * sigma组成的协方差矩阵
+    // 其中：e(i) = [e_x,e_y,...]^T, Q为观测数据协方差矩阵，即sigma * sigma组成的协方差矩阵
     // 误差加权最小二次结果越小，说明观测数据精度越高
     // 那么，score = SUM((th - e(i)^T * Q^(-1) * e(i)))的分数就越高
     // 算法目标： 检查单应变换矩阵
@@ -679,7 +679,7 @@ float Initializer::CheckHomography(
         // 将图像2中的特征点通过单应变换投影到图像1中
         // |u1|   |h11inv h12inv h13inv||u2|   |u2in1|
         // |v1| = |h21inv h22inv h23inv||v2| = |v2in1| * w2in1inv
-        // |1 |   |h31inv h32inv h33inv||1 |   |  1  |
+        // |1 |   |vh31in h32inv h33inv||1 |   |  1  |
 		// 计算投影归一化坐标
         const float w2in1inv = 1.0/(h31inv * u2 + h32inv * v2 + h33inv);
         const float u2in1 = (h11inv * u2 + h12inv * v2 + h13inv) * w2in1inv;
@@ -742,7 +742,7 @@ float Initializer::CheckFundamental(
 
     // 说明：在已值n维观测数据误差服从N(0，sigma）的高斯分布时
     // 其误差加权最小二乘结果为  sum_error = SUM(e(i)^T * Q^(-1) * e(i))
-    // 其中：e(i) = [e_x,e_y,...]^T, Q维观测数据协方差矩阵，即sigma * sigma组成的协方差矩阵
+    // 其中：e(i) = [e_x,e_y,...]^T, Q为观测数据协方差矩阵，即sigma * sigma组成的协方差矩阵
     // 误差加权最小二次结果越小，说明观测数据精度越高
     // 那么，score = SUM((th - e(i)^T * Q^(-1) * e(i)))的分数就越高
     // 算法目标：检查基础矩阵
