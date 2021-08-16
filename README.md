@@ -9,10 +9,51 @@ SLAM学习过程记录
 
 ### 基础矩阵F、本质矩阵E、单应矩阵H
 
+首先根据十四讲中作如下定义  
+1.基本变量定义  
+设空间点P在第一帧图像的相机坐标系下坐标：
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129569543-7e2c370b-e4fd-4411-bd23-f07365b89b2f.png"></p>  
+相机内参为K  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129570065-885775d2-39de-41ce-861f-e5341d6910f5.png"></p>  
+P点在第一帧相机坐标系下深度为s1, 第二帧相机坐标系下深度为s2, R，t为相机坐标1到相机坐标系2的变换
+
+2.本质矩阵E与基础矩阵F的推导：  
+
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129570421-d0f20616-dd64-424e-90b6-b683ea3e1456.png"></p>  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129570541-e7b84d92-b40d-4d02-a4b1-f0de71815000.png"></p>  
+等式两边同时除以K的逆  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129571421-f53bd631-4781-44b6-8bfc-801cc59d5e0b.png"></p>  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129571360-15fcea6f-472d-4ace-9632-144a2bbabf5f.png"></p>  
+记x1,x2分别为两像素点的归一化平面上的坐标（相当于把P分别除以各种坐标系下的深度s1或s2，得到的坐标，本质上还是在相机坐标系的坐标）  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129571827-04f6c4f0-42b1-4443-81ca-9b873bf8af1c.png"></p>  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129571951-3754f82f-74fa-4a90-a270-7c626802dfee.png"></p>  
+好的最后这个式子右边是个加法，不太简洁，我们左右同乘t的反对称矩阵即可消去t(可以看下反对称矩阵的概念，左乘t的反对称矩阵相当于和t做叉乘，t和自己做叉乘为0向量)  
+
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129572767-eea88853-a871-4d24-9c21-86d5cc9d6afa.png"></p>  
+这个时候还不太简洁，要是一边能等于0就好了，左边s2是个常数，剩下的是个与t和x2都垂直的向量，所以我们两边同时乘以x2的转置，左边就等于0，为什么乘x2的专置不去乘t的专置？因为那样右边就没有x2，整个式子和第二帧图像坐标没关系了呀。 
+
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129573787-41318bc8-0052-41cf-8283-0cf716e8cdec.png"></p>  
+最后就得到了这个式子：  
+
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129573985-33a7f1a5-9e08-4c50-94bc-df16f66b2bdf.png"></p>  
+至于作为常数的s1和s2，我们会发现最后不管他们值为多少，都会有上面这个式子，相当于深度信息在对极约束中被“丢掉了”，其实所谓的单目尺度不确定性到底是为什么，通过这么推导下来就很明确了。  
+像素坐标p1.p2再带回去就是  
+
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129574826-bff2d14a-4304-40f5-ab2d-1496d15012ad.png"></p>  
+根据带不带内参K，就有了本质矩阵E和基础矩阵F，也就是下面两个对极约束的形式
+
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129575179-ea97d91e-5536-45b7-bd3b-f3e8051478b3.png"></p>  
+
+3.单应矩阵H的推导  
+单应矩阵是假设两帧图像的特征点落在同一个平面上，这样会多一个平面的约束，最后出来的H就是反应了同处于一个平面上的点在两张图像之间的变换关系。它的应用还是比较广泛的我们后面再说。  
+
+
+
+
+
 单应矩阵
-单应矩阵描述了两个平面之间的映射关系，在两个视图中特征点都处于现实世界的同一平面时，可以用单应矩阵求解两幅图像的变换关系。
-单应矩阵推导
-https://zhuanlan.zhihu.com/p/138266214
+单应矩阵描述了两个平面之间的映射关系，在两个视图中特征点都处于现实世界的同一平面时，可以用单应矩阵求解两幅图像的变换关系。  
+[单应矩阵推导](https://zhuanlan.zhihu.com/p/138266214)
 
 ### 1-1卡方检验
 理解：如两自由度，当r<5.99时，即有95%的概率(95%的把握)认为服从自由度为2的卡方分布(我们认为只有5%的概率会把内点错误的当成外点?)
