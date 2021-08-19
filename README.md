@@ -1,13 +1,13 @@
 # VSLAM
 SLAM学习过程记录
-* [1SLAM基础知识](#1SLAM基础知识)
-  * [基础矩阵F、本质矩阵E、单应矩阵H](#基础矩阵F、本质矩阵E、单应矩阵H)
+* [1SLAM基础知识](#1SLAM基础知识))
   * [1-1卡方检验](#1-1卡方检验)
+  * [基础矩阵F本质矩阵E单应矩阵H](#基础矩阵F本质矩阵E单应矩阵H)
 * [相关公司](#相关公司)
 
 ## 1SLAM基础知识
 
-### 基础矩阵F、本质矩阵E、单应矩阵H
+### 基础矩阵F本质矩阵E单应矩阵H
 
 首先根据十四讲中作如下定义  
 1.基本变量定义  
@@ -42,7 +42,36 @@ P点在第一帧相机坐标系下深度为s1, 第二帧相机坐标系下深度
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/129574826-bff2d14a-4304-40f5-ab2d-1496d15012ad.png"></p>  
 根据带不带内参K，就有了本质矩阵E和基础矩阵F，也就是下面两个对极约束的形式
 
-<p align="center"><img src="https://user-images.githubusercontent.com/58176267/129575179-ea97d91e-5536-45b7-bd3b-f3e8051478b3.png"></p>  
+
+ <p align="center"><img src="https://user-images.githubusercontent.com/58176267/129575179-ea97d91e-5536-45b7-bd3b-f3e8051478b3.png"></p>  
+
+#### 本质矩阵E  
+这里先补充一些数学知识  
+1.3x3的反对称矩阵的秩为2  
+设
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130084577-eacea821-1301-4b4e-b717-4042c0dab629.png"></p>  
+则a的反对称矩阵A为  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130085311-b1ccad27-0d81-4988-b6a2-1205fd301744.png"></p> 
+行初等变换不改变矩阵的秩，先交换行顺序  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130085845-60d76be5-e292-4b1b-b546-17b6346cc2e7.png"></p> 
+第一行乘a2，第二行乘a3，将第一行加到第二行  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130086777-86a6410b-59c7-4ea6-97c3-8acc133b3893.png"></p>  
+将第三行乘a1，再加第二行，得到  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130087104-e9231849-ad94-4c56-b36c-a1c2818cf109.png"></p>  
+秩为2.  
+2.关于矩阵的秩  
+初等矩阵：由单位矩阵经过一次初等变换得到的矩阵  
+初等变换不改变矩阵的秩
+可逆矩阵经过初等变换能够变换成单位阵：想一下我们再线代中使用过的求一个矩阵的逆的方法，通过将该矩阵和单位阵组成的一个增广矩阵，经过有限次初等变换后，该矩阵变为单位阵，而右边单位阵的地方现在就是该矩阵的逆矩阵。也就是说，一个矩阵可逆，它一定能通过有限次的初等变换得到。对一个矩阵做一次初等行变换，相当于左侧一个初等矩阵(该矩阵由单位阵做同样的初等行变换得到)。所以，一个可逆矩阵，可以表示成有限个初等矩阵的乘积。例如：  
+A为可逆矩阵，左乘B，相当于一系列初等矩阵左乘B，就是对B做一系列初等行变换。A右乘B，相当于一系列初等矩阵右乘B，就是对B做一系列初等列变换
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130089977-02f334f9-460d-4580-a3f1-9435a09fb8d3.png"></p>  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130090723-2202556e-7d59-4ae5-821d-ea5a7f3fc7ef.png"></p>  
+
+本质矩阵E  
+因为R为可逆矩，所以
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/130091239-d92a9e66-2bbd-4583-8539-5500c26966eb.png"></p>  
+
+
 
 3.单应矩阵H的推导  
 单应矩阵是假设两帧图像的特征点落在同一个平面上，这样会多一个平面的约束，最后出来的H就是反应了同处于一个平面上的点在两张图像之间的变换关系。它的应用还是比较广泛的我们后面再说。  
