@@ -72,6 +72,7 @@ A为可逆矩阵，左乘B，相当于一系列初等矩阵左乘B，就是对B�
 因为R为可逆矩，所以
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/130091239-d92a9e66-2bbd-4583-8539-5500c26966eb.png"></p>  
 
+[自由度问题](https://www.zhihu.com/question/270431743)
 
 
 3.单应矩阵H的推导  
