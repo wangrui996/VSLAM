@@ -18,7 +18,7 @@ SLAM学习过程记录
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/129570065-885775d2-39de-41ce-861f-e5341d6910f5.png"></p>  
 P点在第一帧相机坐标系下深度为s1, 第二帧相机坐标系下深度为s2, R，t为相机坐标1到相机坐标系2的变换
 
-2.本质矩阵E与基础矩阵F的推导：  
+2.本质矩阵E与基础矩阵F：  
 
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/129570421-d0f20616-dd64-424e-90b6-b683ea3e1456.png"></p>  
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/129570541-e7b84d92-b40d-4d02-a4b1-f0de71815000.png"></p>  
@@ -68,16 +68,28 @@ A为可逆矩阵，左乘B，相当于一系列初等矩阵左乘B，就是对B�
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/130089977-02f334f9-460d-4580-a3f1-9435a09fb8d3.png"></p>  
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/130090723-2202556e-7d59-4ae5-821d-ea5a7f3fc7ef.png"></p>  
 
+
 本质矩阵E  
 因为R为可逆矩，所以
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/130091239-d92a9e66-2bbd-4583-8539-5500c26966eb.png"></p>  
 
-[自由度问题](https://www.zhihu.com/question/270431743)
+[自由度问题](https://www.zhihu.com/question/270431743)  
+
+#### 基础矩阵F  
 
 
 3.单应矩阵H的推导  
-单应矩阵是假设两帧图像的特征点落在同一个平面上，这样会多一个平面的约束，最后出来的H就是反应了同处于一个平面上的点在两张图像之间的变换关系。它的应用还是比较广泛的我们后面再说。  
-
+单应矩阵是假设两帧图像的特征点落在同一个平面上，这样会多一个平面的约束，最后出来的H就是反应了同处于一个平面上的点在两张图像之间的变换关系。它的应用还是比较广泛的我们后面再说。空间中的3D点P的集合共平面，这个平面可以用相机坐标系下的两个参数表示  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131254445-7716c8da-cf30-4e2a-9ef2-e6fc312d1734.png"></p>  
+这里的n应该为黑体，表示该平面的法向量；d表示相机坐标系原点到该平面的距离  
+所以，空间中的点P位于该平面上，则满足：  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131254823-17fefd9c-0a9c-427e-9857-480d714adfb1.png"></p>  
+即  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131254952-9fda4f8c-c77b-4381-ae39-cf6ace3ad444.png"></p>  
+由前面的推导  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131255825-ae0cc82e-2954-4f98-ae3a-d2bd34da274a.png"></p>  
+整理一下把s2除过来，中间部分记为H
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131255869-b24404d3-c880-45b3-9e0a-70a164ac1011.png"></p>  
 
 
 
