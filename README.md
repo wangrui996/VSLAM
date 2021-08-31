@@ -102,7 +102,8 @@ A为可逆矩阵，左乘B，相当于一系列初等矩阵左乘B，就是对B�
 
 ### 三角化  
 由于单目SLAM无法直接获取深度数据，需要通过三角化来恢复空间点，下面是推导过程，代码方面，ORB_SLAM中实现了这部分代码，opencv中cv::triangulatePoints()函数实现过程基本一致，但是最后没有把齐次坐标最后一维归一化。  
-<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131511866-303868b8-7bf1-49c5-b229-87e5918c093f.png"></p> 
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131512937-edce199b-7ad6-415b-8858-141d2deafb00.png"></p>   
+求解该方程：将A进行SVD分解，右奇异值矩阵的最后一列即为问题的解，opencv的SVD分解求出来是Vt，因此取最后一行，注意将最后一维归一化为1才是齐次坐标的形式。
 
 
 
