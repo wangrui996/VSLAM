@@ -88,9 +88,11 @@ A为可逆矩阵，左乘B，相当于一系列初等矩阵左乘B，就是对B�
 即  
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/131254952-9fda4f8c-c77b-4381-ae39-cf6ace3ad444.png"></p>  
 由前面的推导  
-<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131255825-ae0cc82e-2954-4f98-ae3a-d2bd34da274a.png"></p>  
-整理一下把s2除过来，中间部分记为H
-<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131255869-b24404d3-c880-45b3-9e0a-70a164ac1011.png"></p>  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131977123-cd237e25-ed35-47fe-88fa-2f7d46a68012.png"></p>  
+整理一下把s2除过来，中间部分记为H  
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/131978176-c6253c0f-48d6-432a-81a3-7e6843234d6a.png"></p>  
+注意，由于p1，p2都是齐次坐标，所以常系数有和没有都不影响最终的结果，也就是Hp1和cHp1的效果是一样的，加了常数c最后得到的p2最后相当于都乘了个c，但最后一维要归一化，所以结果一致。这也是为什么H矩阵自由度为8的原因。  
+
 
 
 
