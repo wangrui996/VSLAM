@@ -380,8 +380,8 @@ public:
 
     // MapPoints associated to keypoints, NULL pointer if no association.
     /// 每个特征点对应的MapPoint.如果特征点没有对应的地图点,那么将存储一个空指针
-    std::vector<MapPoint*> mvpMapPoints;
-
+    std::vector<MapPoint*> mvpMapPoints;  
+    
     // Flag to identify outlier associations.
     // 观测不到Map中的3D点
     /// 属于外点的特征点标记,在 Optimizer::PoseOptimization 使用了
