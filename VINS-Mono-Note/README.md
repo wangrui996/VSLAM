@@ -1,3 +1,74 @@
+个人学习Vins_Mono源码的笔记  
+
+视觉前端
+
+* [1Vins公式推导](#1Vins公式推导)
+  * [](#)
+* [2Vins代码阅读笔记](#2Vins代码阅读笔记)
+  * [视觉前端](#视觉前端)
+
+## 1Vins公式推导
+
+## 2Vins代码阅读笔记  
+
+### 视觉前端  
+
+前端主要工作包括：  
+1.特征提取——获取特征点像素坐标  
+2.特征点去畸变——得到去畸变后的归一化坐标  
+3.特征点光流追踪  
+4.特征点速度计算——用于相机和IMU时间戳矫正
+
+vins_mono的前端作为了一个独立的ros节点
+feature_tracker_node.cpp  
+流程：  
+初始化ros节点，创建ros句柄  
+读取配置文件   readParameters(n); // 读取配置文件
+
+
+parameters.cpp  
+roslaunch文件
+void readParameters(ros::NodeHandle &n) 读取配置文件的参数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 这是VINS-Mono开源代码的注释版本，方便大家学习这款非常优秀的VIO框架，原git库地址https://github.com/HKUST-Aerial-Robotics/VINS-Mono
 
 关于代码的注释会不定期更新，欢迎关注
@@ -112,7 +183,7 @@ Set the **pose_graph_save_path** in the config file (YOUR_VINS_FOLEDER/config/eu
 Set the **load_previous_pose_graph** to 1 before doing 3.1.1. The system will load previous pose graph from **pose_graph_save_path**. Then you can play MH_02 bag. New sequence will be aligned to the previous pose graph.
 
 ## 4. AR Demo
-4.1 Download the [bag file](https://www.dropbox.com/s/s29oygyhwmllw9k/ar_box.bag?dl=0), which is collected from HKUST Robotic Institute. For friends in mainland China, download from [bag file](https://pan.baidu.com/s/1geEyHNl).
+4.1 Download the [bag file](https://www.dropbox.com/s/s29oygyhwmllw9k/ar_box.bag?dl=0), which is collected from HKUST Robotic Institute. For friends in mainland China, download from [bag file]().
 
 4.2 Open three terminals, launch the ar_demo, rviz and play the bag file respectively.
 ```
