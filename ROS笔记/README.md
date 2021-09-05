@@ -73,15 +73,41 @@ ros::param::set("参数名"， value);
 
 读取参数  
 n.getParam("参数名"， 变量名);
-ros::param::get("参数名"， 变量名);
-  
-```cpp
-ros::NodeHandle n; //全局
-ros::NodeHandle nh("~"); //波浪线表示句柄所在命名空间为该节点
+ros::param::get("参数名"， 变量名);  
 
-//为参数设置默认值
-n.param<type>
-  
+如下配置文件，节点内的参数为局部参数，launch下的为全局参数
+
+```YAML
+<launch>
+  <param name="path" value="/home" />
+  <param name="pid_p" value="6" />
+  <node pkg="controller" type="px4_pose_controller" name="px4_pose_controller" output="screen">
+     <param name="path" value="/wr" />
+     <param name="pid_p" value="4" />
+  </node>		
+</launch>
+``` 
+cpp中使用配置文件中参数
+ 
+```cpp
+#include <ros/ros.h>
+
+int main(int argc, char** argv)
+{
+   std::string path1, path2;
+   int kp1, kp2;  
+   ros::init(argc, argv, "px4_pose_controller");
+   ros::NodeHandle n; //全局命名空间 /
+   ros::NodeHandle nh("~"); //局部，命名空间为 /节点名称
+ 
+   n.getParam("path", path1); // path1 = "/home";
+   nh.getParam("path", path2); // path2 = "wr";
+ 
+   n.getParam("pid_p")
+   nh.getParam("/pid_p", kp2); //kp2 = 6; 
+ 
+   rerurn 0;
+}
 ```  
 
 
