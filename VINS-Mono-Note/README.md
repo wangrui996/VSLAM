@@ -19,10 +19,16 @@
 3.特征点光流追踪  
 4.特征点速度计算——用于相机和IMU时间戳矫正
 
-vins_mono的前端作为了一个独立的ros节点，查看feature_tracker_node.cpp  
+vins_mono的前端作为了一个独立的ros节点
+feature_tracker_node.cpp  
+流程：  
+初始化ros节点，创建ros句柄  
+读取配置文件   readParameters(n); // 读取配置文件
 
 
-
+parameters.cpp  
+roslaunch文件
+void readParameters(ros::NodeHandle &n) 读取配置文件的参数
 
 
 
