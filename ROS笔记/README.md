@@ -11,7 +11,12 @@
 
 ## 1基础  
 
-## ROS命名空间
+### ROS初始化和关闭  
+ros::init(agrc, argv, "node_name") 节点初始化，在调用roscpp的API之前需要执行该命令
+ros::shutdown()：关闭节点，停止发布、订阅、服务等
+
+
+### ROS命名空间
 假设launch 文件中 ns=="namespace"
 ```cpp
 ros::init(argc, argv, "node_name"); //节点名称为  node_name
