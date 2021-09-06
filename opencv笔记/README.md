@@ -55,16 +55,44 @@ if (!fs.isOpened())
 
 #### 读写操作  
 读写操作可以使用FileStorage的成员函数，也可以使用其他opencv函数(需要传入FileStorage对象)
-(1) 读参数  
-使用重载的运算符[]  
+(1) 从文件读取参数    
+使用重载的运算符[]加操作符>>  
+fs["文件中变量的名"] >> cpp文件中变量的名字
 ```cpp
 cv::FileStorage fs(config_path, cv::FileStorage::READ);
+
+//C++基本数据类型
 string path;
 int kp;
 fs["PATH"] >> path;
 kp = fs["KP"];
-```
 
+//数组
+vector<int> v1;
+fs["vector_Kp"] >> v1;
+for(int i = 0; i < v1.size(); i++)
+{
+    cout << v1[i] << " ";
+}
+cout << endl;
+
+//opencv类型，常用Mat型
+cv::Mat K;
+fs["Cam_K"] >> K;
+cout << K << endl;
+```  
+(2) 写入文件  
+使用操作符<<   fs << "文件中变量的名" << 变量的值;
+```cpp
+cv::FileStorage fs(config_path, cv::FileStorage::WRITE);
+//字符串
+string path = "/home";  
+fs << "PATH" << path; //将path写入文件中，文件中名称为PATH
+//数组
+vector<int> v2(1, 2, 3);
+fs << "vector_v2" << v2;
+```  
+也可以进行其它数据类型的读写操作，如SEQ(sequence)、MAP(mapping),[参考](https://blog.csdn.net/sandalphon4869/article/details/104020330?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-0.control&spm=1001.2101.3001.4242)
 
 
 #### 3、关闭
