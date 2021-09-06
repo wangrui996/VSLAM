@@ -27,8 +27,10 @@ feature_tracker_node.cpp
 
 
 parameters.cpp  
-roslaunch文件
-void readParameters(ros::NodeHandle &n) 读取配置文件的参数
+ros初始化  
+读取配置文件的参数  void readParameters(ros::NodeHandle &n)  
+feature追踪器(FeatureTracker类的对象，这里只有一个摄像头数组里面只有一个对象)通过成员函数获取内参
+
 
 
 
