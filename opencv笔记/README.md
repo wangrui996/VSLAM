@@ -41,7 +41,9 @@ cv::FileStorage fsSettings;
 fsSettings.open(config_path, cv::FileStorage::READ);
 ```
 
-#### 2、判断是否打开成功isOpened()
+#### 2、判断是否打开成功isOpened()  
+virtual bool cv::FileStorage::isOpened	(		)	const  
+成功返回true、失败返回false
 ```cpp
 cv::FileStorage fs(config_path, cv::FileStorage::READ);
 if (!fs.isOpened())
@@ -49,6 +51,24 @@ if (!fs.isOpened())
     std::cerr << "failed to open " << config_path << std::endl;
     return 1;
 }
-``
+```  
+
+#### 读写操作  
+读写操作可以使用FileStorage的成员函数，也可以使用其他opencv函数(需要传入FileStorage对象)
+(1) 读参数  
+使用重载的运算符[]  
+```cpp
+cv::FileStorage fs(config_path, cv::FileStorage::READ);
+string path;
+int kp;
+fs["PATH"] >> path;
+kp = fs["KP"];
+```
+
+
+
+#### 3、关闭
+virtual void cv::FileStorage::release()  
+关闭文件并释放所有内存缓冲区,在对文件操作完成后调用此方法。  
 
 
