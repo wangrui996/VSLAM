@@ -24,7 +24,8 @@ vins_mono的前端作为了一个独立的ros节点
 #### feature_tracker_node.cpp  
 ##### 流程  
 初始化ros节点，创建ros句柄  
-读取配置文件   readParameters(n);  [void readParameters(ros::NodeHandle &n)](#void-readParameters(ros::NodeHandle-&n))  
+读取配置文件   readParameters(n);  
+[void readParameters(ros::NodeHandle &n)](#void)  
 feature追踪器(FeatureTracker类的对象，这里只有一个摄像头数组里面只有一个对象)通过成员函数获取内参  
     
     trackerData[i].readIntrinsicParameter(CAM_NAMES[i]);    // 获得每个相机的内参
@@ -40,6 +41,7 @@ feature追踪器(FeatureTracker类的对象，这里只有一个摄像头数组�
 
 ##### void readParameters(ros::NodeHandle &n)
 
+#### void
 
 
 
