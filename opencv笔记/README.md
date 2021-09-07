@@ -12,11 +12,12 @@
 
 
 
-### 读写yaml文件  
+### FileStorage读写yaml文件  
 opencv提供了cv::FileStorage类(文件存储)，支持对XML/YAML/JSON格式的文件进行读写操作,查看该类的定义，首先使用枚举类型定义了文件存储的模式，常用的有WRITE，READ等  
-
-[FileStorage官方文档](https://docs.opencv.org/3.4.1/da/d56/classcv_1_1FileStorage.html)
-
+FileStorage类以FileNode为单位存储数据，即一个FileNode就是一个文件存储节点  
+[FileStorage官方文档](https://docs.opencv.org/3.4.1/da/d56/classcv_1_1FileStorage.html)  
+[FileNode官方文档](https://docs.opencv.org/3.4.1/de/dd9/classcv_1_1FileNode.html)  
+   
 使用时需要注意，类似于C++中使用文件流操作文件，使用时代码中需要利用提供的接口判断文件是否被正常打开，一个FileStorage句柄只能在对一个文件操作完成，并且关闭后才能再进行其他操作，
 也不能有两个FileStorage句柄同时读或写(一个关闭以后另外一个才能进行)。下面结合常用的操作进行说明  
 #### 1.打开文件  
@@ -53,11 +54,14 @@ if (!fs.isOpened())
 }
 ```  
 
+#### 类型
+
 #### 读写操作  
 读写操作可以使用FileStorage的成员函数，也可以使用其他opencv函数(需要传入FileStorage对象)
 (1) 从文件读取参数    
 使用重载的运算符[]加操作符>>  
-fs["文件中变量的名"] >> cpp文件中变量的名字
+fs["文件中变量的名"] >> cpp文件中变量的名字  
+因为FileStorage重载的()运算符返回类型为FileNode，因此需要使用重载的运算符>>(不是FileNode类的成员函数，)将它的值加载到对应的变量中，如果是基本数据类型，也可以使用强制类型转换的方式
 ```cpp
 cv::FileStorage fs(config_path, cv::FileStorage::READ);
 
@@ -65,7 +69,7 @@ cv::FileStorage fs(config_path, cv::FileStorage::READ);
 string path;
 int kp;
 fs["PATH"] >> path;
-kp = fs["KP"];
+kp = static_cast<int>fs["KP"];
 
 //数组
 vector<int> v1;
@@ -98,5 +102,22 @@ fs << "vector_v2" << v2;
 #### 3、关闭
 virtual void cv::FileStorage::release()  
 关闭文件并释放所有内存缓冲区,在对文件操作完成后调用此方法。  
+
+
+#### FileNode文件存储节点  
+[FileNode官方文档](https://docs.opencv.org/3.4.1/de/dd9/classcv_1_1FileNode.html)  
+FileStorage类以FileNode为单位存储数据，即一个FileNode就是一个文件存储节点  
+FileNode有个枚举变量Type，表示该文件存储节点的类型    
+<p align="center"><img src="https://user-images.githubusercontent.com/58176267/132356808-8eb75eff-5cb2-45c7-b8af-ad3e1934bf3d.png"></p>  
+
+##### 成员函数
+
+    bool cv::FileNode::isNone	(		)	const
+返回这个节点是否是个none类型  
+是指没有写具体值还是读参数时没有叫这个名字的参数？
+
+
+
+
 
 
