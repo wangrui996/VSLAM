@@ -21,33 +21,135 @@
 
 vins_mono的前端作为了一个独立的ros节点
 
-#### feature_tracker_node.cpp  
-##### 流程  
+camera_model文件夹  
+定义了Camera虚基类，针孔相机，鱼眼相机等派生类，具体相机的实例通过工厂模式生成。  
+每个Camera虚基类内部都定义了一个参数Parameters类，也是个虚基类，在各派生类中也要实现它的纯虚函数
+
+
+
+
+
+
+---
+
+### Camera虚基类  
+
+#### 成员函数  
+#### 成员属性
+##### public  
+
+定义了枚举类型ModelType，并在protected中定义了它的一个变量m_modelType，被派生类继承后，通过yaml读取参数进来后赋值，作为相机类型  
+###### Parameters虚基类
+protected类型的成员
+相机类型,相机内参,图像宽，高等所有派生类都会有的属性
+
+
+
+
+
+
+---
+### PinholeCamera针孔相机派生类  
+该类公有继承自Camera类，内部Parameters类公有继承自Camera::Parameters
+### 成员属性  
+#### public  
+公有继承了Camera::Parameters
+protected类型的成员
+除了继承自Camera的成员外，根据针孔相机特点又定义了部分参数，包括四个畸变参数(m_k1,m_k2,m_p1,m_p2)和内参(m_fx,m_fy,m_cx,m_cy)
+
+
+### 成员函数   
+
+#### setParameters
+void PinholeCamera::setParameters(const PinholeCamera::Parameters& parameters)  
+首先将parameters赋值给mParameters  
+做一些预处理方便后面去畸变操作  
+
+ 
+#### readFromYamlFile
+bool PinholeCamera::Parameters::readFromYamlFile(const std::string& filename)  
+根据配置文件读取相机参数，成功则返回true，失败返回false  
+包括相机类型，相机名，相机畸变参数，内参
+
+
+
+
+
+
+
+
+
+
+---
+### feature_tracker_node.cpp  
+#### 流程  
 初始化ros节点，创建ros句柄  
 读取配置文件   readParameters(n);  
-[void readParameters(ros::NodeHandle &n)](#void)  
+[void readParameters(ros::NodeHandle &n)](#readparameters)  
 feature追踪器(FeatureTracker类的对象，这里只有一个摄像头数组里面只有一个对象)通过成员函数获取内参  
     
     trackerData[i].readIntrinsicParameter(CAM_NAMES[i]);    // 获得每个相机的内参
+[readIntrinsicParameter](#读内参)  
+创建订阅者和发布者——对外发布三个话题，特征，图像和重启
+ros::spin();循环，执行回调
+
+#### 函数  
+
+// 图片的回调函数  
+void img_callback(const sensor_msgs::ImageConstPtr &img_msg)  
+(1)判断是否是第一帧，是就记录时间，等待下一帧过来   
+(2)检查时间戳是否正常，异常则执行reset(重新设置为还没有接收到第一帧前的状态)，并对其他模块发布重启话题  
+(3)频率控制，控制发送给后端的频率    
+首先计算当前频率(使用当前已发送次数除以当前时间与起始时间的间隔)，在预设频率范围内就发布当前帧，但是注意，这里计算的是一个平均频率      
+虽然平均频率满足在预设范围内了，但是delta t越大，它对发送次数越不敏感，比如现在第100s，发送了900次，f=9，假如到第101s时发送了930次，此时计算f=9.3仍然满足f<10,但是从100s到101s的这段时间内的平均频率已经达到了30Hz，将导致后端压力过大；  
+因此加一个判断：若当前这段时间的平均频率与预设频率很接近，就认为这段时间还比较符合要求，为了避免delta t太大，把初始时间和发布次数重置一下(恢复了)  
+另外注意，即使不向后端发送,光流仍然进行(光流对连续两帧的时间要求比较高，太长时间间隔容易导致光流追踪失败)  
+(4)通过cv_bridge转换ros图像为cv图像
+
+
+---   
+### feature_tracker.cpp feature_tracker.h
+
+#### 成员属性  
+
+```cpp
+camodocal::CameraPtr m_camera; //相机实例  typedef boost::shared_ptr<Camera> CameraPtr；  
+```
+
+#### 成员函数
+```cpp
+void FeatureTracker::readIntrinsicParameter(const string &calib_file)
+{
+    ROS_INFO("reading paramerter of camera %s", calib_file.c_str());
+    // 读到的相机内参赋给m_camera
+    // camodocal::CameraPtr m_camera;  //? camodocal命名空间下定义了Camera虚基类 typedef boost::shared_ptr<Camera> CameraPtr;
+    m_camera = CameraFactory::instance()->generateCameraFromYamlFile(calib_file);
+}
+```
+传入配置文件路径，通过CameraFactory的静态成员函数创建实例[CameraFactory::instance()](#创建camerafactory实例)，紧接调用相机生成函数创建一个带有参数信息的相机实例generateCameraFromYamlFile(calib_file)(工厂模式)，[创建相机实例](#从yaml文件创建相机camera实例)  
 
 
 
-##### 函数
+
+
+
+
+
+
+##### 读内参
 
 
 ##### parameters.cpp  
 
 ##### 函数
 
-##### void readParameters(ros::NodeHandle &n)
 
-#### void
+#### readParameters
 
-
-
+    void readParameters(ros::NodeHandle &n)
 
 
-|`[回到顶部](#readme)`|[回到顶部](#readme)|
+##### parameters.cpp  
 
 
 
@@ -60,6 +162,42 @@ feature追踪器(FeatureTracker类的对象，这里只有一个摄像头数组�
 
 
 
+
+
+
+---
+### CameraFactory.cc  CameraFactory.h    
+定义了CameraFactory类，
+
+#### 函数  
+
+#### 创建CameraFactory实例
+```cpp
+boost::shared_ptr<CameraFactory>
+CameraFactory::instance(void)
+{
+    if (m_instance.get() == 0)
+    {
+        m_instance.reset(new CameraFactory);
+    }
+
+    return m_instance;
+}
+```
+
+#### 从yaml文件创建相机Camera实例  
+打开该yaml文件，如果打开不成功则返回一个不含指针的CameraPtr  
+创建成功，根据yaml定义的相机类型创建具体派生类的实例,以针孔相机模型为例  PinholeCameraPtr camera(new PinholeCamera);  
+有了实例接下来就是读取配置文件的相机参数到该实例，其中读取工作是由Parameters完成，因为camera实例中包含了一个Parameters型对象，因此下面通过公有接口先拿到这个对象，再调用读取函数  
+通过PinholeCamera提供的公有函数getParameters()得到类的Parameters型私有成员并赋给params，这里函数返回的是引用。  
+
+    params.readFromYamlFile(filename);
+    camera->setParameters(params);  
+
+[readFromYamlFile](#readfromyamlfile) 通过继承的Parameters类的接口实现  
+注意，通过这一步读取参数，只是将参数放在了一个Parameters类的对象中了，这个
+[setParameters](#setparameters) 通过PinholeCamera类的成员函数  
+结束以后返回创建的这个camera  
 
 
 
