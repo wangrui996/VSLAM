@@ -34,6 +34,8 @@ ros::NodeHandle gn("/global"); // gn 命名空间为/global
 ```
 如果launch文件没有指定ns，则相应的/namespace换成默认的 /
 
+### ROS日志 ROS_INFO ROS_DEBUG等  
+
 
 
 ### ROS参数服务器  
