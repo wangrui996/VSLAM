@@ -110,14 +110,41 @@ FileStorage类以FileNode为单位存储数据，即一个FileNode就是一个�
 FileNode有个枚举变量Type，表示该文件存储节点的类型    
 <p align="center"><img src="https://user-images.githubusercontent.com/58176267/132356808-8eb75eff-5cb2-45c7-b8af-ad3e1934bf3d.png"></p>  
 
+主要说一下里面的两种类中MAP和  
+
+
+
 ##### 成员函数
 
     bool cv::FileNode::isNone	(		)	const
-返回这个节点是否是个none类型  
+(1)返回这个节点是否是个none类型,可用于判断
 是指没有写具体值还是读参数时没有叫这个名字的参数？
 
+(2)重载了运算符[],用于返回mapping节点或者sequence节点的参数(注意返回类型仍然是FileNode，因此赋值给其他变量时还要用重载的>>运算符或者强制类型转换，但后者只能针对基本数据类型使用)  
 
 
+
+例，有如下从vins取出来的部分参数  
+```yaml
+%YAML:1.0
+image_width: 640
+image_height: 480
+distortion_parameters:
+   k1: 9.2615504465028850e-02
+   k2: -1.8082438825995681e-01
+   p1: -6.5484100374765971e-04
+   p2: -3.5829351558557421e-04
+projection_parameters:
+   fx: 6.0970550296798035e+02
+   fy: 6.0909579671294716e+02
+   cx: 3.1916667152289227e+02
+   cy: 2.3558360480225772e+02
+```
+读取里面的参数  
+```cpp
+
+
+```
 
 
 
