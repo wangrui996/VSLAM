@@ -811,7 +811,7 @@ void
 PinholeCamera::setParameters(const PinholeCamera::Parameters& parameters)
 {
     mParameters = parameters;
-    // 检查图片是否去过畸变
+    // 是否去畸变
     if ((mParameters.k1() == 0.0) &&
         (mParameters.k2() == 0.0) &&
         (mParameters.p1() == 0.0) &&
@@ -823,7 +823,7 @@ PinholeCamera::setParameters(const PinholeCamera::Parameters& parameters)
     {
         m_noDistortion = false;
     }
-
+    //做一些预处理方便后续去畸变
     m_inv_K11 = 1.0 / mParameters.fx();
     m_inv_K13 = -mParameters.cx() / mParameters.fx();
     m_inv_K22 = 1.0 / mParameters.fy();

@@ -57,7 +57,7 @@ class FeatureTracker
     vector<int> track_cnt;
     map<int, cv::Point2f> cur_un_pts_map;
     map<int, cv::Point2f> prev_un_pts_map;
-    camodocal::CameraPtr m_camera;
+    camodocal::CameraPtr m_camera;  //typedef boost::shared_ptr<Camera> CameraPtr;
     double cur_time;
     double prev_time;
 

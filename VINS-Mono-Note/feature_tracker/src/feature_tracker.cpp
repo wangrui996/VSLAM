@@ -92,8 +92,8 @@ void FeatureTracker::addPoints()
  * 2、光流追踪
  * 3、提取新的特征点（如果发布）
  * 4、所有特征点去畸变，计算速度
- */
-void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)
+ */    
+void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time)       
 {
     cv::Mat img;
     TicToc t_r;
@@ -259,6 +259,7 @@ void FeatureTracker::readIntrinsicParameter(const string &calib_file)
 {
     ROS_INFO("reading paramerter of camera %s", calib_file.c_str());
     // 读到的相机内参赋给m_camera
+    // camodocal::CameraPtr m_camera;  //? camodocal命名空间下定义了Camera虚基类 typedef boost::shared_ptr<Camera> CameraPtr;
     m_camera = CameraFactory::instance()->generateCameraFromYamlFile(calib_file);
 }
 

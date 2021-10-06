@@ -57,7 +57,8 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
     {
         PUB_THIS_FRAME = true;
         // reset the frequency control
-        // 这段时间的频率和预设频率十分接近，就认为这段时间很棒，重启一下，避免delta t太大
+        // 这段时间的平均频率和预设频率十分接近，就认为这段时间比较符合要求
+        // 时间太长会导致对发布次数不敏感，因此重置一下，避免delta t太大
         if (abs(1.0 * pub_count / (img_msg->header.stamp.toSec() - first_image_time) - FREQ) < 0.01 * FREQ)
         {
             first_image_time = img_msg->header.stamp.toSec();
@@ -219,10 +220,17 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "feature_tracker");   // ros节点初始化
     ros::NodeHandle n("~"); // 声明一个句柄，～代表这个节点的命名空间
     ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);    // 设置ros log级别
+    //参数变量为全局变量，在parameters.cpp中被定义
     readParameters(n); // 读取配置文件
+    
 
     for (int i = 0; i < NUM_OF_CAM; i++)
         trackerData[i].readIntrinsicParameter(CAM_NAMES[i]);    // 获得每个相机的内参
+
+    
+    //本文件内定义了 FeatureTracker trackerData[NUM_OF_CAM];
+    //类FeatureTracker的成员 camodocal::CameraPtr m_camera;  //typedef boost::shared_ptr<Camera> CameraPtr;
+    //通过上面过程，通过CameraFactory创建了带相机参数的camera实例并赋值给trackerData[i]的成员m_camera
 
     if(FISHEYE)
     {

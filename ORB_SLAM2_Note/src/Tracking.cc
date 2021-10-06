@@ -1065,7 +1065,7 @@ void Tracking::CreateInitialMapMonocular()
 
     // Set median depth to 1
     // Step 5 取场景的中值深度，用于尺度归一化 
-    // 为什么是 pKFini 而不是 pKCur ? 答：都可以的，内部做了位姿变换了
+    // ?为什么是 pKFini 而不是 pKCur ? 答：都可以的，内部做了位姿变换了
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
     float invMedianDepth = 1.0f/medianDepth;
     
@@ -1115,10 +1115,13 @@ void Tracking::CreateInitialMapMonocular()
 
     mLastFrame = Frame(mCurrentFrame);
 
+    //mpMap句柄设置参考地图点,用于绘图显示局部地图点
     mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
 
+    //track的绘图器句柄设置当前帧位姿
     mpMapDrawer->SetCurrentCameraPose(pKFcur->GetPose());
 
+    //mpMap句柄保存最初始的关键帧
     mpMap->mvpKeyFrameOrigins.push_back(pKFini);
 
     mState=OK;// 初始化成功，至此，初始化过程完成

@@ -53,6 +53,7 @@ CameraFactory::generateCamera(Camera::ModelType modelType,
     {
         PinholeCameraPtr camera(new PinholeCamera);
 
+        //camera->getParameters();通过引用获取PinholeCamera私有成员mParameters(Parameters mParameters;)
         PinholeCamera::Parameters params = camera->getParameters();
         params.cameraName() = cameraName;
         params.imageWidth() = imageSize.width;
@@ -101,11 +102,12 @@ CameraFactory::generateCameraFromYamlFile(const std::string& filename)
 
     if (!fs.isOpened())
     {
-        return CameraPtr();
+        return CameraPtr();//使用boost::shared_ptr的默认构造函数，对象中不含指针，计数为0
     }
 
     Camera::ModelType modelType = Camera::MEI;
     // 通过配置文件获取相机的模型
+    // 也就是说yaml文件中没写model_type的话,类型被设置为Camera::MEI
     if (!fs["model_type"].isNone())
     {
         std::string sModelType;
@@ -159,7 +161,7 @@ CameraFactory::generateCameraFromYamlFile(const std::string& filename)
         OCAMCameraPtr camera(new OCAMCamera);
 
         OCAMCamera::Parameters params = camera->getParameters();
-        params.readFromYamlFile(filename);
+        params.readFromYamlFile(filename); 
         camera->setParameters(params);
         return camera;
     }
