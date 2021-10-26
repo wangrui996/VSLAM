@@ -983,7 +983,7 @@ void Tracking::MonocularInitialization()
         }//当初始化成功的时候进行
     }//如果单目初始化器已经被创建
 }
-
+ 
 /**
  * @brief 单目相机成功初始化后用三角化得到的点生成MapPoints
  * 
