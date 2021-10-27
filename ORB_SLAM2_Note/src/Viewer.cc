@@ -71,7 +71,7 @@ Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer
     mViewpointF = fSettings["Viewer.ViewpointF"];
 }
 
-// pangolin库的文档：http://docs.ros.org/fuerte/api/pangolin_wrapper/html/namespacepangolin.html
+// pangolin库的文档：c
 //查看器的主进程看来是外部函数所调用的
 void Viewer::Run()
 {
@@ -110,7 +110,7 @@ void Viewer::Run()
                 );
 
     // Add named OpenGL viewport to window and provide 3D Handler
-    // 定义显示面板大小，orbslam中有左右两个面板，昨天显示一些按钮，右边显示图形
+    // 定义显示面板大小，orbslam中有左右两个面板，左边显示一些按钮，右边显示图形
     // 前两个参数（0.0, 1.0）表明宽度和面板纵向宽度和窗口大小相同
     // 中间两个参数（pangolin::Attach::Pix(175), 1.0）表明右边所有部分用于显示图形
     // 最后一个参数（-1024.0f/768.0f）为显示长宽比
