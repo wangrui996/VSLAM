@@ -109,7 +109,7 @@ void Viewer::Run()
                 pangolin::ModelViewLookAt(mViewpointX,mViewpointY,mViewpointZ, 0,0,0,0.0,-1.0, 0.0)
                 );
 
-    // Add named OpenGL viewport to window and provide 3D Handler
+    // L viewport to wiAdd named OpenGndow and provide 3D Handler
     // 定义显示面板大小，orbslam中有左右两个面板，左边显示一些按钮，右边显示图形
     // 前两个参数（0.0, 1.0）表明宽度和面板纵向宽度和窗口大小相同
     // 中间两个参数（pangolin::Attach::Pix(175), 1.0）表明右边所有部分用于显示图形
@@ -137,7 +137,7 @@ void Viewer::Run()
 
         // step1：得到最新的相机位姿
         mpMapDrawer->GetCurrentOpenGLCameraMatrix(Twc);
-
+        
         // step2：根据相机的位姿调整视角
         // menuFollowCamera为按钮的状态，bFollow为真实的状态
         if(menuFollowCamera && bFollow)
