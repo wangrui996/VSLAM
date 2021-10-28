@@ -11,7 +11,11 @@
 
 
 #include <thread>
+#include <iostream>
+
 #include "Viewer.h"
+
+using namespace std;
 
 int main(int argc, char* argv[])
 {

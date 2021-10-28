@@ -20,7 +20,7 @@ Viewer::Viewer()
 }
 
 //多线程的主函数
-Viewer::Run()
+void Viewer::Run()
 {
     
     pangolin::CreateWindowAndBind("SLAM_Viewer",1024, 768);
@@ -44,7 +44,7 @@ Viewer::Run()
     //范围是“相机视图”的全部范围，显示长宽比-1024.0f/768.0f
     pangolin::View& d_cam = pangolin::CreateDisplay()
         .SetBounds(0.0, 1.0, 0.0, 1.0, -1024.0f/768.0f)
-        .SetHandler(new pangolin::Header3D(s_cam));
+        .SetHandler(new pangolin::Handler3D(s_cam));
 
     while(1)
     {
