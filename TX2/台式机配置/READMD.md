@@ -6,6 +6,11 @@
 cuda版本：10.1  
 cuDNN版本：7.6.5
 
+## CUDA切换10.0与10.1版本  
+
+cuda-10.0切换后才能cuda-10.1  
+* 1.sudo rm -rf /usr/local/cuda #删除之前生成的软链接  
+* 2.sudo ln -s /usr/local/cuda-10.1 /usr/local/cuda #生成新的软链接  
 
 
 ## pytorch环境配置  
