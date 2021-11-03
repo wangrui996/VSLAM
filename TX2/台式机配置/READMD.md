@@ -1,6 +1,12 @@
 # 台式机配置  
 
 
+## 显卡驱动  
+libnvidia-cfg1-460:amd64                     460.56-0ubuntu0.18.04.1 
+
+
+
+
 ## CUDA/cuDNN  
 
 cuda版本：10.1  
@@ -27,4 +33,15 @@ Anaconda3-5.1.0-Windows-x86_64.exe     对应 python3.6.3
 [清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/)
 
 python版本：3.6.3
+
+##   TensorRT  
+TensorRT下载    
+[TensorRT Download](https://developer.nvidia.com/nvidia-tensorrt-download)    
+
+**台式机使用：**  
+TensorRT 7.0.0 配合CUDA10.0  cuDNN7.6.5    
+
+
+
+
 
