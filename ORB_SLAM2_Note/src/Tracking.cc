@@ -1164,7 +1164,7 @@ void Tracking::CheckReplacedInLastFrame()
  * @return 如果匹配数超10，返回true
  * 
  */
-bool Tracking::TrackReferenceKeyFrame()
+bool Tracking:: TrackReferenceKeyFrame()
 {
     // Compute Bag of Words vector
     // Step 1：将当前帧的描述子转化为BoW向量

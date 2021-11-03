@@ -1258,8 +1258,9 @@ void TemplatedVocabulary<TDescriptor,F>::transform(const TDescriptor &feature,
     // 更新树的深度
     ++current_level;
     // 取出当前节点所有子节点的id
+    // std::vector<Node> m_nodes;
     nodes = m_nodes[final_id].children;
-    // 取子节点中第1个的id，用于后面距离比较的初始值
+    // 取子节点中第1个的id，用于后面距离比较的初始值, 就是根节点下面的第一个节点id
     final_id = nodes[0];
 
     // 取当前节点第一个子节点的描述子距离初始化最佳（小）距离
@@ -1275,8 +1276,11 @@ void TemplatedVocabulary<TDescriptor,F>::transform(const TDescriptor &feature,
         final_id = id;
       }
     }
+
+    //上面做完以后，current_level记录了当前层数，final_id记录了当前层与传入的特征描述子汉明距离最近的那个节点的id
     
     // 记录当前描述子转化为Word后所属的 node id，它距离叶子深度为levelsup
+    // 这一步就是为了确定nid（word所属的node的id），但是如果遍历的时候还没到上面设定的nid_level = m_L - levelsup，就不执行这个操作
     if(nid != NULL && current_level == nid_level)
       *nid = final_id;
     
