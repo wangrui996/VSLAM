@@ -5,6 +5,8 @@
 libnvidia-cfg1-460:amd64                     460.56-0ubuntu0.18.04.1 
 
 
+#
+[conda创建虚拟环境安装cuda，cudnn，tensort](https://blog.csdn.net/weixin_41010198/article/details/107604593?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-1.no_search_link&spm=1001.2101.3001.4242.2)
 
 
 ## CUDA/cuDNN  
