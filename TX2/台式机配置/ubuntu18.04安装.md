@@ -44,9 +44,37 @@ ubuntu安装分区好后，引导位置安装在默认的地方（西数蓝盘�
 e1000e  
 BIOS设置：快速启动 关闭    密钥：全删除  
 
-4.nvida驱动安装  需要
+4.nvida驱动安装  
+
+4.1 首先禁用nouveau  
+在/etc/modprobe.d/blacklist.conf里添加
+
+      blacklist nouveau
+      options nouveau modeset=0  
+
+查询可用的nvidia版本：ubuntu-drivers devices  
+
+因为后面要用cuda10.0和cudnn7.6.5，安装nvidia-drivers-460后执行nvidia-smi发现CUDA版本是11.2  
 
 
+[英伟达驱动安装方式cuda10.0 cudnn7.6.5](https://www.cxyzjd.com/article/qq_39462585/111991678)  
+
+
+4.2 cuda10.0安装  
+[cuda10.0下载](https://developer.nvidia.com/cuda-toolkit-archive)  
+
+[安装过程参考](https://www.cxyzjd.com/article/qq_39462585/111991678)  
+
+选择了版本：nvidia-drivers-460  
+
+
+## TX2备份与恢复  
+
+
+
+
+## d455驱动  
+针对台式机：  
 
 
 
