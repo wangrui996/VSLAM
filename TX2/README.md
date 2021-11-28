@@ -61,3 +61,12 @@ find_package(
 ```
 
 
+## 设置静态ip  
+
+### 笔记本虚拟机  
+https://ld246.com/article/1593929878472  
+
+
+
+
+
