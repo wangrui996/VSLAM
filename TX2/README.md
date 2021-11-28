@@ -61,12 +61,13 @@ find_package(
 ```
 
 
-## 设置静态ip  
+## 设置静态ip    
 
-### 笔记本虚拟机  
-https://ld246.com/article/1593929878472  
+### 笔记本虚拟机   
+https://ld246.com/article/1593929878472   
 
-https://blog.csdn.net/u014454538/article/details/88646689
+https://blog.csdn.net/u014454538/article/details/88646689  
 
-
+桥接模式上不了网解决方法  
+https://blog.csdn.net/qq_19734597/article/details/102808289  
 
