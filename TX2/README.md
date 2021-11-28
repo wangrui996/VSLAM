@@ -71,3 +71,21 @@ https://blog.csdn.net/u014454538/article/details/88646689
 桥接模式上不了网解决方法  
 https://blog.csdn.net/qq_19734597/article/details/102808289  
 
+
+## ubuntu源码安装openssh或ssl   
+
+https://www.cnblogs.com/xiaochina/p/7486073.html  
+https://rosinelan.github.io/2018/04/04/ubuntu%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85openssh/  
+笔记本虚拟机之前带了ssl1.1.1版本，使用的openssh8.4版本  
+
+先删除原先/usr下的ssh相关文件，/etc/ssh文件夹  
+配置  
+```cpp
+./configure --prefix=/usr/local/openssh --sysconfdir=/etc/ssh
+```
+
+
+
+安装完成后，每次开机需要使用sudo /usr/local/openssh/sbin/sshd  执行启动ssh  
+
+
