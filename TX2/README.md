@@ -89,3 +89,8 @@ https://rosinelan.github.io/2018/04/04/ubuntu%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%8
 安装完成后，每次开机需要使用sudo /usr/local/openssh/sbin/sshd  执行启动ssh  
 
 https://github.com/wangrui996/VSLAM/edit/master/TX2/README.md
+
+## TX2网络问题
+[TX2连不上网排查](https://cloud.tencent.com/developer/article/1543039)
+
+
