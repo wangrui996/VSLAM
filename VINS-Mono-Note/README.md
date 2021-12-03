@@ -9,6 +9,11 @@
 
 ## 1Vins公式推导
 
+[崔华坤vins公式推导](https://github.com/StevenCui/VIO-Doc)
+
+
+
+
 ## 2Vins代码阅读笔记  
 
 ### 视觉前端  
