@@ -43,6 +43,18 @@ TensorRT下载
 **台式机使用：**  
 TensorRT 7.0.0 配合CUDA10.0  cuDNN7.6.5    
 
+### 使用TensorRT遇到的问题  
+ * **问题1**  
+报错找不到 NvInfer.h   
+**解决：**  
+因为我的tensorRT是下载tar解压安装的，库文件和头文件都在下载解压的目录，因此需要修改CMakeLists.txt，设置其头文件和库文件的路径  
+
+```txt  
+# tensorrt  
+include_directories(/home/wangrui/下载/TensorRT/TensorRT-7.0.0.11/include)  
+link_directories(/home/wangrui/下载/TensorRT/TensorRT-7.0.0.11/lib)  
+```  
+
 
 
 
