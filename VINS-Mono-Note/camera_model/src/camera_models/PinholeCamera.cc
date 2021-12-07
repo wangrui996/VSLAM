@@ -470,7 +470,8 @@ PinholeCamera::liftProjective(const Eigen::Vector2d& p, Eigen::Vector3d& P) cons
             double k1 = mParameters.k1();
             double k2 = mParameters.k2();
             double p1 = mParameters.p1();
-            double p2 = mParameters.p2();
+            double p2 = m
+            Parameters.p2();
 
             // Apply inverse distortion model
             // proposed by Heikkila

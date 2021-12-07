@@ -41,18 +41,20 @@ double last_imu_t = 0;
 
 /**
  * @brief 根据当前imu数据预测当前位姿
+ * 注意这里预测的起点都是以后端优化的结果为起点的，所以结果比较准确，同时频率给提高到了和IMU频率相同
  * 
  * @param[in] imu_msg 
  */
 void predict(const sensor_msgs::ImuConstPtr &imu_msg)
 {
     double t = imu_msg->header.stamp.toSec();
-    if (init_imu)
+    if (init_imu) //第一帧imu的标志位，初始为0，进入后只把latest_time赋值为当前imu的时间，之后将标志位置0
     {
         latest_time = t;
         init_imu = 0;
         return;
     }
+
     double dt = t - latest_time;
     latest_time = t;
 
@@ -67,20 +69,30 @@ void predict(const sensor_msgs::ImuConstPtr &imu_msg)
     double rz = imu_msg->angular_velocity.z;
     Eigen::Vector3d angular_velocity{rx, ry, rz};
     // 上一时刻世界坐标系下加速度值
-    Eigen::Vector3d un_acc_0 = tmp_Q * (acc_0 - tmp_Ba) - estimator.g;
+    //tmp_Ba加速度计零偏
+    //tmp_Q:上一时刻(帧)imu在世界系下的姿态   acc_0:上一帧imu加速度值(算完之后在后面会重新赋值)
+    //tmp_Q * (acc_0 - tmp_Ba)得到了上一帧世界系下的加速度值(IMU系转到world)，之后减去重力，得到了世界系下没有重力影响
+    Eigen::Vector3d un_acc_0 = tmp_Q * (acc_0 - tmp_Ba) - estimator.g;  //Estimator estimator;  Estimator类下public成员Vector3d g;
 
-    // 中值陀螺仪的结果
+    // 中值陀螺仪的结果(上一帧和这一帧陀螺仪值)
     Eigen::Vector3d un_gyr = 0.5 * (gyr_0 + angular_velocity) - tmp_Bg;
-    // 更新姿态
+    
+    // 更新姿态 (先更新当前姿态因为后面更新当前加速度需要用到)
+    // un_gyr * dt陀螺仪中值*dt 得到角度变化量
+    // Utility::deltaQ类下的deltaQ()函数
+    // 姿态变换量(四元数表示)右乘上一帧姿态，得到当前帧姿态
     tmp_Q = tmp_Q * Utility::deltaQ(un_gyr * dt);
+    
     // 当前时刻世界坐标系下的加速度值
     Eigen::Vector3d un_acc_1 = tmp_Q * (linear_acceleration - tmp_Ba) - estimator.g;
-    // 加速度中值积分的值
+    // 加速度中值积分的值(世界坐标系下)
     Eigen::Vector3d un_acc = 0.5 * (un_acc_0 + un_acc_1);
+    
     // 经典物理中位置，速度更新方程
     tmp_P = tmp_P + dt * tmp_V + 0.5 * dt * dt * un_acc;
     tmp_V = tmp_V + dt * un_acc;
-
+    
+    //当前加速度和陀螺仪值赋值成上一时刻的值，以便下次使用
     acc_0 = linear_acceleration;
     gyr_0 = angular_velocity;
 }
@@ -110,13 +122,15 @@ getMeasurements()
 {
     std::vector<std::pair<std::vector<sensor_msgs::ImuConstPtr>, sensor_msgs::PointCloudConstPtr>> measurements;
 
-    while (true)
+    while (true) //注意这里是个死循环，取符合要求的imu数据和图像数据组成pair，并放到measurements数组，知道两个buffer有空的或者不满足时间戳要求了就把measurements返回
     {
-        if (imu_buf.empty() || feature_buf.empty())
+        if (imu_buf.empty() || feature_buf.empty())//有一个是空的无法对齐  
             return measurements;
         // imu   *******
         // image          *****
         // 这就是imu还没来
+        // 希望 imu最后一个时间戳大于图像第一帧时间戳(补偿时间差后的)，此时才有可能满足对齐操作的条件(两帧间有imu数据)
+        // 因此如果满足取反，imu最后一个时间戳小于等于图像第一帧时间戳(补偿时间差后的)，没办法对齐，需要等待imu进来，使图像帧之间含有imu数据
         if (!(imu_buf.back()->header.stamp.toSec() > feature_buf.front()->header.stamp.toSec() + estimator.td))
         {
             //ROS_WARN("wait for imu, only should happen at the beginning");
@@ -126,6 +140,8 @@ getMeasurements()
         // imu        ****
         // image    ******
         // 这种只能扔掉一些image帧
+        // 希望 imu第一个时间戳小于图像第一帧时间戳(补偿时间差后的)，因为第一个图像帧没法找到它之前的对应的imu数据？
+        // vins取关联数据是取这一帧图像之前的imu数据
         if (!(imu_buf.front()->header.stamp.toSec() < feature_buf.front()->header.stamp.toSec() + estimator.td))
         {
             ROS_WARN("throw img, only should happen at the beginning");
@@ -135,16 +151,19 @@ getMeasurements()
         // 此时就保证了图像前一定有imu数据
         sensor_msgs::PointCloudConstPtr img_msg = feature_buf.front();
         feature_buf.pop();
-        // 一般第一帧不会严格对齐，但是后面就都会对齐，当然第一帧也不会用到
+        // 一般第一帧不会严格对齐，但是后面就都会对齐，当然第一帧也不会用到(在第一帧图像来之前可能累积了过多的imu数据，但是这部分数据和第一帧图像在滑窗中没有使用)
+        // 取出第一帧图像前的imu数据放到IMUs
         std::vector<sensor_msgs::ImuConstPtr> IMUs;
         while (imu_buf.front()->header.stamp.toSec() < img_msg->header.stamp.toSec() + estimator.td)
         {
             IMUs.emplace_back(imu_buf.front());
             imu_buf.pop();
         }
-        // 保留图像时间戳后一个imu数据，但不会从buffer中扔掉
+        // 保留图像时间戳后一个imu数据，但不会从buffer中扔掉，因为后面图像帧还是需要的
         // imu    *   *
         // image    *
+        // 刚刚是把第一帧图像时间戳之前的imu数据从imu_buf拿出来放到了IMUs，现在imu_buf中第一个imu数据的时间戳在刚在拿出的第一帧图像img_msg时间戳的后面，也放到IMUs中
+        // 目的是把IMUs中最后两个imu数据插值得到这帧图像对应的imu数据(更合适)，如上图
         IMUs.emplace_back(imu_buf.front());
         if (IMUs.empty())
             ROS_WARN("no imu between two image");
@@ -161,13 +180,17 @@ getMeasurements()
  */
 void imu_callback(const sensor_msgs::ImuConstPtr &imu_msg)
 {
+    //时间戳判断
     if (imu_msg->header.stamp.toSec() <= last_imu_t)
     {
         ROS_WARN("imu message in disorder!");
         return;
     }
     last_imu_t = imu_msg->header.stamp.toSec();
-    // 讲一下线程锁 条件变量用法
+    
+    // 线程锁 条件变量用法 （https://www.jianshu.com/p/c1dfa1d40f53）
+    //imu回调函数，需要将imu数据加入一个队列，另外有线程需要将imu数据从队列中取出imu数据；需要通过线程锁，保证放的时候不能取，取的时候不能放
+    //条件变量，保证cpu占用率不会过高；加完数据“通知”需要取数据的线程，取数据的线程如果没有收到“通知”就进入休眠状态，不占用cpu资源
     m_buf.lock();
     imu_buf.push(imu_msg);
     m_buf.unlock();
@@ -177,6 +200,7 @@ void imu_callback(const sensor_msgs::ImuConstPtr &imu_msg)
 
     {
         std::lock_guard<std::mutex> lg(m_state);
+        //预测：根据当前imu数据预测当前位姿(P,V,Q)
         predict(imu_msg);
         std_msgs::Header header = imu_msg->header;
         header.frame_id = "world";
@@ -247,6 +271,7 @@ void process()
     {
         std::vector<std::pair<std::vector<sensor_msgs::ImuConstPtr>, sensor_msgs::PointCloudConstPtr>> measurements;
         std::unique_lock<std::mutex> lk(m_buf);
+        //这里相当于一直给imu和图像buffer上锁等待(不再放数据了？)，getMeasurements()函数去除了buffer中满足要求的数据后(measurements.size()!=0)再解锁，执行下面的流程
         con.wait(lk, [&]
                  {
             return (measurements = getMeasurements()).size() != 0;
@@ -256,27 +281,30 @@ void process()
         // 给予范围的for循环，这里就是遍历每组image imu组合
         for (auto &measurement : measurements)
         {
+            //这里面每一个measurement是个pair
             auto img_msg = measurement.second;
             double dx = 0, dy = 0, dz = 0, rx = 0, ry = 0, rz = 0;
             // 遍历imu
             for (auto &imu_msg : measurement.first)
             {
+                //与上面img_msg对应的每一个imu数据
                 double t = imu_msg->header.stamp.toSec();
                 double img_t = img_msg->header.stamp.toSec() + estimator.td;
-                if (t <= img_t)
+                if (t <= img_t) //imu时间戳在图像时间戳之前，不需要做额外处理
                 { 
                     if (current_time < 0)
                         current_time = t;
-                    double dt = t - current_time;
+                    double dt = t - current_time; //当前imu时间t与上一个imu时间差
                     ROS_ASSERT(dt >= 0);
-                    current_time = t;
+                    current_time = t; //
                     dx = imu_msg->linear_acceleration.x;
                     dy = imu_msg->linear_acceleration.y;
                     dz = imu_msg->linear_acceleration.z;
                     rx = imu_msg->angular_velocity.x;
                     ry = imu_msg->angular_velocity.y;
                     rz = imu_msg->angular_velocity.z;
-                    // 时间差和imu数据送进去
+                    // 时间差和imu数据送进去，时间差是当前取出的这帧imu与上帧imu的时间差
+                    // 后端接口，处理imu数据
                     estimator.processIMU(dt, Vector3d(dx, dy, dz), Vector3d(rx, ry, rz));
                     //printf("imu: dt:%f a: %f %f %f w: %f %f %f\n",dt, dx, dy, dz, rx, ry, rz);
 

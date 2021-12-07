@@ -19,6 +19,7 @@ void Estimator::setParameter()
     }
     f_manager.setRic(ric);
     // 这里可以看到虚拟相机的用法
+    // 视觉的置信度：重投影误差的置信度，通过虚拟相机，认为提到的特征点，1.5个像素误差
     ProjectionFactor::sqrt_info = FOCAL_LENGTH / 1.5 * Matrix2d::Identity();
     ProjectionTdFactor::sqrt_info = FOCAL_LENGTH / 1.5 * Matrix2d::Identity();
     td = TD;
@@ -189,15 +190,16 @@ void Estimator::processImage(const map<int, vector<pair<int, Eigen::Matrix<doubl
         {
             bool result = false;
             // 要有可信的外参值，同时距离上次初始化不成功至少相邻0.1s
+            
             // Step 3： VIO初始化
             if( ESTIMATE_EXTRINSIC != 2 && (header.stamp.toSec() - initial_timestamp) > 0.1)
             {
                result = initialStructure();
                initial_timestamp = header.stamp.toSec();
             }
-            if(result)
+            if(result)  //成功初始化
             {
-                solver_flag = NON_LINEAR;
+                solver_flag = NON_LINEAR;  //进入非线性优化阶段
                 // Step 4： 非线性优化求解VIO
                 solveOdometry();
                 // Step 5： 滑动窗口
@@ -459,7 +461,7 @@ bool Estimator::visualInitialAlign()
         TIC_TMP[i].setZero();
     ric[0] = RIC[0];
     f_manager.setRic(ric);
-    // 多约束三角化所有的特征点，注意，仍带是尺度模糊的
+    // 多约束三角化所有的特征点，注意，仍然是尺度模糊的
     f_manager.triangulate(Ps, &(TIC_TMP[0]), &(RIC[0]));
 
     double s = (x.tail<1>())(0);
@@ -567,7 +569,8 @@ void Estimator::solveOdometry()
     {
         TicToc t_tri;
         // 先把应该三角化但是没有三角化的特征点三角化
-        f_manager.triangulate(Ps, tic, ric);
+        // 三角化的地图点肯定是由能共同观测到这个点的相机帧计算出的，通过三角化点可以建立两帧(不一定是连续的两帧)的约束关系，帮助位姿的收敛
+        f_manager.triangulate(Ps, tic, ric); 
         ROS_DEBUG("triangulation costs %f", t_tri.toc());
         optimization();
     }

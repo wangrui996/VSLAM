@@ -108,7 +108,7 @@ void RefineGravity(map<double, ImageFrame> &all_image_frame, Vector3d &g, Vector
             tmp_A.block<3, 2>(3, 6) = frame_i->second.R.transpose() * dt * Matrix3d::Identity() * lxly;
             tmp_b.block<3, 1>(3, 0) = frame_j->second.pre_integration->delta_v - frame_i->second.R.transpose() * dt * Matrix3d::Identity() * g0;
 
-
+ 
             Matrix<double, 6, 6> cov_inv = Matrix<double, 6, 6>::Zero();
             //cov.block<6, 6>(0, 0) = IMU_cov[i + 1];
             //MatrixXd cov_inv = cov.inverse();
@@ -211,7 +211,7 @@ bool LinearAlignment(map<double, ImageFrame> &all_image_frame, Vector3d &g, Vect
     {
         return false;
     }
-    // 重力修复
+    // 重力修复(利用重力加速度 先验，调整"枢纽帧"的重力方向、大小)
     RefineGravity(all_image_frame, g, x);
     // 得到真实尺度
     s = (x.tail<1>())(0) / 100.0;

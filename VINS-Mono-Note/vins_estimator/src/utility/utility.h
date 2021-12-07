@@ -13,6 +13,7 @@ class Utility
 {
   public:
     template <typename Derived>
+    //
     static Eigen::Quaternion<typename Derived::Scalar> deltaQ(const Eigen::MatrixBase<Derived> &theta)
     {
         typedef typename Derived::Scalar Scalar_t;
@@ -20,8 +21,8 @@ class Utility
         Eigen::Quaternion<Scalar_t> dq;
         Eigen::Matrix<Scalar_t, 3, 1> half_theta = theta;
         half_theta /= static_cast<Scalar_t>(2.0);
-        dq.w() = static_cast<Scalar_t>(1.0);
-        dq.x() = half_theta.x();
+        dq.w() = static_cast<Scalar_t>(1.0); //旋转角非常小时，实部近似为1
+        dq.x() = half_theta.x(); //虚部
         dq.y() = half_theta.y();
         dq.z() = half_theta.z();
         return dq;

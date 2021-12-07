@@ -309,7 +309,7 @@ void FeatureManager::triangulate(Vector3d Ps[], Vector3d tic[], Matrix3d ric[])
 
         if (it_per_id.estimated_depth < 0.1)
         {
-            it_per_id.estimated_depth = INIT_DEPTH; // 具体太近就设置成默认值
+            it_per_id.estimated_depth = INIT_DEPTH; // 距离太近就设置成默认值
         }
 
     }
