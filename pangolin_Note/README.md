@@ -16,7 +16,11 @@
 
 [Learn OpenGL](https://learnopengl-cn.github.io/01%20Getting%20started/08%20Coordinate%20Systems/)  
 
-[OpenGL学习](https://www.cnblogs.com/Anita9002/p/4386472.html)
+[OpenGL学习](https://www.cnblogs.com/Anita9002/p/4386472.html)  
+
+[OpenG模型](https://github.com/tigert1998/skeletal-animation)
+
+
 
 [glBlendFunc()函数——设置颜色混合 透明度叠加计算](http://blog.chinaunix.net/uid-20622737-id-2850251.html)  
 
