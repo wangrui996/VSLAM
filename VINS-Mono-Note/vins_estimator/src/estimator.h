@@ -106,13 +106,13 @@ class Estimator
     double initial_timestamp;
 
 
-    double para_Pose[WINDOW_SIZE + 1][SIZE_POSE];
-    double para_SpeedBias[WINDOW_SIZE + 1][SIZE_SPEEDBIAS];
-    double para_Feature[NUM_OF_F][SIZE_FEATURE];
-    double para_Ex_Pose[NUM_OF_CAM][SIZE_POSE];
-    double para_Retrive_Pose[SIZE_POSE];
-    double para_Td[1][1];
-    double para_Tr[1][1];
+    double para_Pose[WINDOW_SIZE + 1][SIZE_POSE];//位置3 姿态四元数4 每一个参数块维数：7
+    double para_SpeedBias[WINDOW_SIZE + 1][SIZE_SPEEDBIAS]; //速度3 加速度计bias 3 陀螺仪bias 3 每一个参数块维数：9
+    double para_Feature[NUM_OF_F][SIZE_FEATURE];//特征点上限是1000，维护的是逆深度，因此每个参数块维度是 1
+    double para_Ex_Pose[NUM_OF_CAM][SIZE_POSE];//外参，位置+姿态  7维
+    double para_Retrive_Pose[SIZE_POSE];//回环检测相关的位姿
+    double para_Td[1][1]; //时间戳矫正
+    double para_Tr[1][1]; //没用到？
 
     int loop_window_index;
 

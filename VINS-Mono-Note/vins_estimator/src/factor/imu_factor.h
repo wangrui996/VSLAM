@@ -9,6 +9,8 @@
 
 #include <ceres/ceres.h>
 
+//预积分残差，必须继承自ceres::SizedCostFunction  
+//15：预积分残差15维，约束了两帧间的位姿7自由度，速度和零偏9自由度  两个残差块，两帧 因此是7 9 7 9
 class IMUFactor : public ceres::SizedCostFunction<15, 7, 9, 7, 9>
 {
   public:
@@ -29,6 +31,7 @@ class IMUFactor : public ceres::SizedCostFunction<15, 7, 9, 7, 9>
     {
         // 便于后续计算，把参数块都转换成eigen
         // imu预积分的约束的参数是相邻两帧的位姿 速度和零偏
+        // i表示前一帧 j表示后一帧
         Eigen::Vector3d Pi(parameters[0][0], parameters[0][1], parameters[0][2]);
         Eigen::Quaterniond Qi(parameters[0][6], parameters[0][3], parameters[0][4], parameters[0][5]);
 
@@ -66,17 +69,19 @@ class IMUFactor : public ceres::SizedCostFunction<15, 7, 9, 7, 9>
             pre_integration->repropagate(Bai, Bgi);
         }
 #endif
-
+        //残差residuals是个double数组，为了计算方便这里映射成了一个15x1的向量
         Eigen::Map<Eigen::Matrix<double, 15, 1>> residual(residuals);
         // 得到残差
         residual = pre_integration->evaluate(Pi, Qi, Vi, Bai, Bgi,
                                             Pj, Qj, Vj, Baj, Bgj);
         // 因为ceres没有g2o设置信息矩阵的接口，因此置信度直接乘在残差上，这里通过LLT分解，相当于将信息矩阵开根号
+        // pre_integration->covariance.inverse()协方差矩阵的逆——信息矩阵(协方差越大，越不可信，所以协方差矩阵越大，取逆后的信息矩阵越小，越不可信)
         Eigen::Matrix<double, 15, 15> sqrt_info = Eigen::LLT<Eigen::Matrix<double, 15, 15>>(pre_integration->covariance.inverse()).matrixL().transpose();
         //sqrt_info.setIdentity();
         // 这就是带有信息矩阵的残差
         residual = sqrt_info * residual;
         // 关于雅克比的计算手动推导一下
+        // 预积分残差的维度是15维，参数块(约束了k，k+1时刻的位姿(7)，速度零偏(9)，共)
         if (jacobians)
         {
             double sum_dt = pre_integration->sum_dt;

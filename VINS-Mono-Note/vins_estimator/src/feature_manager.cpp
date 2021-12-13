@@ -229,7 +229,7 @@ void FeatureManager::clearDepth(const VectorXd &x)
  */
 VectorXd FeatureManager::getDepthVector()
 {
-    VectorXd dep_vec(getFeatureCount());
+    VectorXd dep_vec(getFeatureCount()); //特征管理器接口getFeatureCount()统计有效特征点数目  
     int feature_index = -1;
     for (auto &it_per_id : feature)
     {

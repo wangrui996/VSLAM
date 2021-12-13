@@ -631,6 +631,10 @@ void Estimator::vector2double()
  * @brief double -> eigen 同时fix第一帧的yaw和平移，固定了四自由度的零空间
  * 
  */
+//pitch和roll由于imu的加入是全局可观的；位置xyz和偏航角是全局不可观的，因为imu预积分和重投影误差 提供的都是帧间约束
+//以一维为例，如第一帧和第二帧有个约束是距离为1m，那么第一帧在0.5m，第二帧在1.5m是可以的； 优化以后可能第一帧变成了1m，第二帧是2m；满足约束；
+//上面的例子就是约束前后在零空间漂了，对优化问题是不利的，解决方案是，固定最早的那一帧的姿态
+//具体代码就是，将优化前的第一帧位姿拿到，优化后姿态转换得到yaw，计算yaw差进行补偿
 void Estimator::double2vector()
 {
     // 取出优化前的第一帧的位姿
@@ -662,19 +666,22 @@ void Estimator::double2vector()
                                        para_Pose[0][5]).toRotationMatrix().transpose();
     }
 
+    //下面的操作：既满足优化的帧间约束，也通过固定第一帧避免了一直只通过帧间约束去优化导致整个位置(平移部分)和yaw角在零空间漂移
     for (int i = 0; i <= WINDOW_SIZE; i++)
     {
         // 保持第1帧的yaw不变
+        // 补偿每一个优化帧yaw角
         Rs[i] = rot_diff * Quaterniond(para_Pose[i][6], para_Pose[i][3], para_Pose[i][4], para_Pose[i][5]).normalized().toRotationMatrix();
         // 保持第1帧的位移不变
+        // 平移部分，固定第一帧平移，其他帧用计算的相对平移都补偿过来；
         Ps[i] = rot_diff * Vector3d(para_Pose[i][0] - para_Pose[0][0],
                                 para_Pose[i][1] - para_Pose[0][1],
                                 para_Pose[i][2] - para_Pose[0][2]) + origin_P0;
-
+        //速度也会受到影响因此速度也补偿
         Vs[i] = rot_diff * Vector3d(para_SpeedBias[i][0],
                                     para_SpeedBias[i][1],
                                     para_SpeedBias[i][2]);
-
+        //两个零偏不用变 直接从double数组转换回eigen就可
         Bas[i] = Vector3d(para_SpeedBias[i][3],
                           para_SpeedBias[i][4],
                           para_SpeedBias[i][5]);
@@ -683,7 +690,7 @@ void Estimator::double2vector()
                           para_SpeedBias[i][7],
                           para_SpeedBias[i][8]);
     }
-
+    //相机和imu的外参，直接从double数组转换回eigen就可
     for (int i = 0; i < NUM_OF_CAM; i++)
     {
         tic[i] = Vector3d(para_Ex_Pose[i][0],
@@ -791,7 +798,9 @@ void Estimator::optimization()
     for (int i = 0; i < WINDOW_SIZE + 1; i++)
     {
         // 由于姿态不满足正常的加法，也就是李群上没有加法，因此需要自己定义他的加法
+        // 初始化在视觉部分时有个全局BA，那里对姿态用的是ceres自带的定义好的四元数的"加法"，但这里参数快是7维的位姿，需要自己定义
         ceres::LocalParameterization *local_parameterization = new PoseLocalParameterization();
+        // para_Pose二维数组    SIZE_POSE参数块大小
         problem.AddParameterBlock(para_Pose[i], SIZE_POSE, local_parameterization);
         problem.AddParameterBlock(para_SpeedBias[i], SIZE_SPEEDBIAS);
     }
@@ -800,7 +809,7 @@ void Estimator::optimization()
     {
         ceres::LocalParameterization *local_parameterization = new PoseLocalParameterization();
         problem.AddParameterBlock(para_Ex_Pose[i], SIZE_POSE, local_parameterization);
-        if (!ESTIMATE_EXTRINSIC)
+        if (!ESTIMATE_EXTRINSIC) //如果这里ESTIMATE_EXTRINSIC为0，表示不需要优化相机和imu的外参，就设置成不变量
         {
             ROS_DEBUG("fix extinsic param");
             // 如果不需要优化外参就设置为fix
@@ -818,7 +827,9 @@ void Estimator::optimization()
     // 实际上还有地图点，其实平凡的参数块不需要调用AddParameterBlock，增加残差块接口时会自动绑定
     TicToc t_whole, t_prepare;
     // eigen -> double
+    // 前面是把参数块指针添加到优化问题，但实际上维护的是eigen的对象，优化问题需要针对double数组求解，这里把最新状态中eigen对象转换成double数组方便ceres求解，求解完成后再转回来
     vector2double();
+    
     // Step 2 通过残差约束来添加残差块，类似g2o的边
     // 上一次的边缘化结果作为这一次的先验
     if (last_marginalization_info)
@@ -844,13 +855,13 @@ void Estimator::optimization()
     // 遍历每一个特征点
     for (auto &it_per_id : f_manager.feature)
     {
-        it_per_id.used_num = it_per_id.feature_per_frame.size();
-        // 进行特征点有效性的检查
+        it_per_id.used_num = it_per_id.feature_per_frame.size(); //这个特征点被滑窗中多少帧看到
+        // 进行特征点有效性的检查 符合这个要求这个特征点才能对滑窗中两帧形成约束
         if (!(it_per_id.used_num >= 2 && it_per_id.start_frame < WINDOW_SIZE - 2))
             continue;
  
         ++feature_index;
-        // 第一个观测到这个特征点的帧idx
+        // 第一个观测到这个特征点的帧idx 这一个特征点逆深度是与首个观测到该特征点的帧绑定的，与该点相关的约束都和这一帧相关
         int imu_i = it_per_id.start_frame, imu_j = imu_i - 1;
         // 特征点在第一个帧下的归一化相机系坐标
         Vector3d pts_i = it_per_id.feature_per_frame[0].point;
@@ -942,7 +953,7 @@ void Estimator::optimization()
     //options.minimizer_progress_to_stdout = true;
     //options.use_nonmonotonic_steps = true;
     if (marginalization_flag == MARGIN_OLD)
-        // 下面的边缘化老的操作比较多，因此给他优化时间就少一些
+        // 下面的边缘化老帧的操作比较多，因此给他优化时间就少一些
         options.max_solver_time_in_seconds = SOLVER_TIME * 4.0 / 5.0;
     else
         options.max_solver_time_in_seconds = SOLVER_TIME;

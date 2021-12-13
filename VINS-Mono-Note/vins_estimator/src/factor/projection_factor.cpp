@@ -31,7 +31,7 @@ bool ProjectionFactor::Evaluate(double const *const *parameters, double *residua
     Eigen::Quaterniond qic(parameters[2][6], parameters[2][3], parameters[2][4], parameters[2][5]);
 
     double inv_dep_i = parameters[3][0];
-    // 地图点在i帧相机坐标系下坐标
+    // 地图点在i帧相机坐标系下坐标  (第i帧归一化平面坐标除以逆深度)
     Eigen::Vector3d pts_camera_i = pts_i / inv_dep_i;
     // 转成第i帧imu坐标系
     Eigen::Vector3d pts_imu_i = qic * pts_camera_i + tic;
@@ -43,15 +43,14 @@ bool ProjectionFactor::Evaluate(double const *const *parameters, double *residua
     Eigen::Vector3d pts_camera_j = qic.inverse() * (pts_imu_j - tic);
     Eigen::Map<Eigen::Vector2d> residual(residuals);
 
-#ifdef UNIT_SPHERE_ERROR 
+#ifdef UNIT_SPHERE_ERROR //（球面模型）
     residual =  tangent_base * (pts_camera_j.normalized() - pts_j.normalized());
-#else
+#else // 归一化坐标平面的方式
     double dep_j = pts_camera_j.z();    // 第j帧相机系下深度
-    residual = (pts_camera_j / dep_j).head<2>() - pts_j.head<2>();  // 重投影误差
+    residual = (pts_camera_j / dep_j).head<2>() - pts_j.head<2>();  // 重投影误差  除以深度归一化后  head<2>取前两维
 #endif
-
-    residual = sqrt_info * residual;    // 误差乘上信息矩阵
-
+    //不像g2o可以设置信息矩阵，因此残差这里需要乘上信息矩阵，可以看视频推导为什么可以这么做
+    residual = sqrt_info * residual;    // 误差乘上信息矩阵  sqrt_info 协方差矩阵的逆 被设置成了 虚拟相机1.5个像素 置信度是不变的，不像imu来一帧要通过预积分更新
     if (jacobians)
     {
         Eigen::Matrix3d Ri = Qi.toRotationMatrix();
@@ -70,24 +69,29 @@ bool ProjectionFactor::Evaluate(double const *const *parameters, double *residua
                      - x1 * x3 / pow(norm, 3),            - x2 * x3 / pow(norm, 3),            1.0 / norm - x3 * x3 / pow(norm, 3);
         reduce = tangent_base * norm_jaco;
 #else
+        //链式求导，先求重投影误差对j帧相机坐标系下的坐标求导 (残差2维，坐标xi，yi，zi三维，所以雅克比为2x3矩阵)
         reduce << 1. / dep_j, 0, -pts_camera_j(0) / (dep_j * dep_j),    // 重投影误差对j帧相机坐标系下坐标求导
             0, 1. / dep_j, -pts_camera_j(1) / (dep_j * dep_j);
 #endif
-        reduce = sqrt_info * reduce;
+        reduce = sqrt_info * reduce; //雅克比矩阵也要乘上信息矩阵
 
-        if (jacobians[0])
-        {
+        //链式法则第二步，求第j帧相机坐标系下坐标(xj,yj,zj)关于各优化变量的雅克比矩阵
+    
+        if (jacobians[0]) //(xj,yj,zj)对第i帧位姿的导数，根据公式 对平移、旋转的求导，，，，
+        {   
+            //对旋转求导要利用扰动模型
+
             Eigen::Map<Eigen::Matrix<double, 2, 7, Eigen::RowMajor>> jacobian_pose_i(jacobians[0]);
 
             Eigen::Matrix<double, 3, 6> jaco_i;
             jaco_i.leftCols<3>() = ric.transpose() * Rj.transpose();
-            jaco_i.rightCols<3>() = ric.transpose() * Rj.transpose() * Ri * -Utility::skewSymmetric(pts_imu_i);
+            jaco_i.rightCols<3>() = ric.transpose() * Rj.transpose() * Ri * -Utility::skewSymmetric(pts_imu_i); //Utility::skewSymmetric将后面的向量转换成对应的反对称矩阵
 
             jacobian_pose_i.leftCols<6>() = reduce * jaco_i;
             jacobian_pose_i.rightCols<1>().setZero();
         }
 
-        if (jacobians[1])
+        if (jacobians[1]) //(xj,yj,zj)对第j帧位姿的导数
         {
             Eigen::Map<Eigen::Matrix<double, 2, 7, Eigen::RowMajor>> jacobian_pose_j(jacobians[1]);
 
@@ -98,7 +102,7 @@ bool ProjectionFactor::Evaluate(double const *const *parameters, double *residua
             jacobian_pose_j.leftCols<6>() = reduce * jaco_j;
             jacobian_pose_j.rightCols<1>().setZero();
         }
-        if (jacobians[2])
+        if (jacobians[2]) //(xj,yj,zj)对外参的雅克比
         {
             Eigen::Map<Eigen::Matrix<double, 2, 7, Eigen::RowMajor>> jacobian_ex_pose(jacobians[2]);
             Eigen::Matrix<double, 3, 6> jaco_ex;
@@ -109,7 +113,7 @@ bool ProjectionFactor::Evaluate(double const *const *parameters, double *residua
             jacobian_ex_pose.leftCols<6>() = reduce * jaco_ex;
             jacobian_ex_pose.rightCols<1>().setZero();
         }
-        if (jacobians[3])
+        if (jacobians[3]) //(xj,yj,zj)对逆深度的雅克比
         {
             Eigen::Map<Eigen::Vector2d> jacobian_feature(jacobians[3]);
 #if 1
