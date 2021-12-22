@@ -3,6 +3,8 @@
 ## V2Ray科学上网  
 
 https://mahongfei.com/1776.html
+https://github.com/Qv2ray/Qv2ray/releases
+https://github.com/v2ray/v2ray-core/releases/
 
 ## 显卡驱动  
 libnvidia-cfg1-460:amd64                     460.56-0ubuntu0.18.04.1 
