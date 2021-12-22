@@ -61,6 +61,29 @@ link_directories(/home/wangrui/下载/TensorRT/TensorRT-7.0.0.11/lib)
 ```  
 
 
+## 记录opencv问题  
+* 1. 希望使用自定义版本的opencv,台式机使用了opencv3.4.1， 因此更换了cv_bridge版本，具体见TX2中源码安装cv_bridge部分  
+* 2. 在编译vins和orb_slam时：
+    * 在find cv_bridge的地方设置了set(cv_bridge_DIR /usr/local/cv_bridge341/share/cv_bridge/cmake) 
+    * 在find opencv的地方设置了opencv版本为3.4.1（或者set  opencv的cmake文件位置)  
+最后在运行时仍然发现问题：
+  大致报错是load library (Poco exception = libopencv_core.so.3.2: cannot open shared object file: No such file or directory)
+由于已经将3.2版本的opencv库文件删除了所以提示找不到是正常的（许多ros默认安装的包都还是默认使用opencv3.2版本），但为什么我明明在CMakeLists中设置了cv_bridge的路径和opencv版本，最后链接的还是opencv3.2？   
+**解决方案：** 当时解决方案没有及时记录下来，但大概是因为ROS工作空间的原因，在编译vins-fusion-gpu和ORB_SLAM3时遇到的问题不太一样  
+  * VINS-fusion-gpu版本：
+  * ORB_SLAM3的ROS包中CMakeLists文件中没有find cv_bridge，最后虽然设置了opencv的版本是3.4.1，但是里面用到了cv_bridge还是自带的包，使用的还是opencv3.2版本，最后提示找不到opencv库，最后解决方案是显示设置cv_bridge包，把库链接到可执行文件上
+  set(cv_bridge_DIR "/usr/local/cv_bridge341/share/cv_bridge/cmake")  
+  find_package(cv_bridge REQUIRED)
+  link_directories("/usr/local/cv_bridge341/lib")
+  target_link_libraries(Mono
+  ${LIBS}
+  cv_bridge
+  )
+
+## usb_cam  
+
+我源码安装usb_cam时也出现了类似上面这个问题，启动后发现中找不到opencv3.2的库，看了下usb_cam的CMakeLists文件，usb_cam本身没问题没用到opencv，实际上是image_view这个包报的错；可以源码安装image_view或者在usb_cam的launch文件中注释调image_view这个节点  
+
 
 
 
