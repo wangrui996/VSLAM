@@ -8,7 +8,7 @@ https://github.com/v2ray/v2ray-core/releases/
 
 ##  Ubuntu终端配置代理
 用下面的方式下载ProxyChains 
-[ProxyChains](https://www.cnblogs.com/guguobao/p/8878109.html)
+[ProxyChains](https://www.cnblogs.com/guguobao/p/8878109.html)  
 用下面方式配置  
 [proxychains配置](https://docs.shanyuhai.top/os/manjaro/terminal-agent.html#proxychains-ng)
 
