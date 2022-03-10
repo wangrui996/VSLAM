@@ -2,9 +2,9 @@
 
 ## V2Ray科学上网  
 
-https://mahongfei.com/1776.html
-https://github.com/Qv2ray/Qv2ray/releases
-https://github.com/v2ray/v2ray-core/releases/
+https://mahongfei.com/1776.html  
+https://github.com/Qv2ray/Qv2ray/releases  
+https://github.com/v2ray/v2ray-core/releases/  
 
 ##  Ubuntu终端配置代理
 用下面的方式下载ProxyChains 
@@ -12,6 +12,7 @@ https://github.com/v2ray/v2ray-core/releases/
 用下面方式配置  
 [proxychains配置](https://docs.shanyuhai.top/os/manjaro/terminal-agent.html#proxychains-ng)
 
+其中，端口号，从v2ray客户端  首选项  入站设置中查看  我的是1089  
 
 
 
