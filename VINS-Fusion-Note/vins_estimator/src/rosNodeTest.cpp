@@ -131,7 +131,11 @@ void sync_process()
     }
 }
 
-
+/**
+ * @brief imu消息处理
+ * 
+ * @param[in] imu_msg 
+ */
 void imu_callback(const sensor_msgs::ImuConstPtr &imu_msg)
 {
     double t = imu_msg->header.stamp.toSec();
@@ -143,11 +147,17 @@ void imu_callback(const sensor_msgs::ImuConstPtr &imu_msg)
     double rz = imu_msg->angular_velocity.z;
     Vector3d acc(dx, dy, dz);
     Vector3d gyr(rx, ry, rz);
+    //imu消息处理，包括 加入buffer，根据VIO结果预测当前位姿
+    //! vins_mono中这个处理直接放在了回调函数中
     estimator.inputIMU(t, acc, gyr);
     return;
 }
 
-
+/**
+ * @brief 将前端信息送进buffer
+ * 
+ * @param[in] feature_msg 
+ */
 void feature_callback(const sensor_msgs::PointCloudConstPtr &feature_msg)
 {
     map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> featureFrame;
@@ -176,6 +186,7 @@ void feature_callback(const sensor_msgs::PointCloudConstPtr &feature_msg)
         featureFrame[feature_id].emplace_back(camera_id,  xyz_uv_velocity);
     }
     double t = feature_msg->header.stamp.toSec();
+    //处理特征  包括：将t,featureFrame组成pair加入特征buffer(注意加的时候加锁)
     estimator.inputFeature(t, featureFrame);
     return;
 }

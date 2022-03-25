@@ -156,13 +156,14 @@ void Estimator::changeSensorType(int use_imu, int use_stereo)
         setParameter();
     }
 }
-
+// estimator对输入的双目图像进行处理
 void Estimator::inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1)
 {
     inputImageCnt++;
     map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> featureFrame;
     TicToc featureTrackerTime;
-
+    //没有右目图像的情况下只跟踪左目图像
+    //光流追踪，追踪结果保存、显示
     if(_img1.empty())
         featureFrame = featureTracker.trackImage(t, _img);
     else
@@ -179,6 +180,7 @@ void Estimator::inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1)
     {     
         if(inputImageCnt % 2 == 0)
         {
+            //光流追踪结果加入特征队列
             mBuf.lock();
             featureBuf.push(make_pair(t, featureFrame));
             mBuf.unlock();
@@ -195,9 +197,17 @@ void Estimator::inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1)
     }
     
 }
-
+/**
+ * @brief 被imu回调函数所调用 将imu数据存进buffer，同时按照imu频率预测位姿并发送，这样就可以提高里程计频率
+ * 
+ * @param[in] t imu消息时间戳 
+ * @param[in] linearAcceleration 三维加速度计数据
+ * @param[in] angularVelocity 三维角速度数据
+ */
 void Estimator::inputIMU(double t, const Vector3d &linearAcceleration, const Vector3d &angularVelocity)
 {
+    // 线程锁 条件变量用法 （https://www.jianshu.com/p/c1dfa1d40f53）
+    //需要将imu数据加入一个队列，另外有线程需要将imu数据从队列中取出imu数据；需要通过线程锁，保证放的时候不能取，取的时候不能放
     mBuf.lock();
     accBuf.push(make_pair(t, linearAcceleration));
     gyrBuf.push(make_pair(t, angularVelocity));
@@ -207,7 +217,9 @@ void Estimator::inputIMU(double t, const Vector3d &linearAcceleration, const Vec
     if (solver_flag == NON_LINEAR)
     {
         mPropagate.lock();
+        //预测：根据当前imu数据预测当前位姿(P,V,Q)
         fastPredictIMU(t, linearAcceleration, angularVelocity);
+        //最新odom封装成ROS消息发布
         pubLatestOdometry(latest_P, latest_Q, latest_V, t);
         mPropagate.unlock();
     }
@@ -1567,22 +1579,40 @@ void Estimator::outliersRejection(set<int> &removeIndex)
 
     }
 }
-
+/**
+ * @brief 根据当前imu数据预测当前位姿
+ * 注意这里预测的起点都是以后端优化的结果为起点的，所以结果比较准确，同时频率给提高到了和IMU频率相同
+ * 
+ * @param[in] imu_msg 
+ */
 void Estimator::fastPredictIMU(double t, Eigen::Vector3d linear_acceleration, Eigen::Vector3d angular_velocity)
 {
     double dt = t - latest_time;
     latest_time = t;
+        // 上一时刻世界坐标系下加速度值
+    //latest_Ba 加速度计零偏
+    //latest_Q:上一时刻(帧)imu在世界系下的姿态   latest_acc_0:上一帧imu加速度值(算完之后在后面会重新赋值)
+    //latest_Q * (latest_acc_0 - latest_Ba)得到了上一帧世界系下的加速度值(IMU系转到world)，之后减去重力，得到了世界系下没有重力影响
     Eigen::Vector3d un_acc_0 = latest_Q * (latest_acc_0 - latest_Ba) - g;
+    // 中值陀螺仪的结果(上一帧和这一帧陀螺仪值)
     Eigen::Vector3d un_gyr = 0.5 * (latest_gyr_0 + angular_velocity) - latest_Bg;
+    // 更新姿态  得到当前帧姿态 (先更新当前姿态因为后面更新当前加速度需要用到)
+    // un_gyr * dt陀螺仪中值*dt 得到角度变化量
+    // Utility::deltaQ类下的deltaQ()函数
+    // 姿态变换量(四元数表示)右乘上一帧姿态，得到当前帧姿态
     latest_Q = latest_Q * Utility::deltaQ(un_gyr * dt);
+    // 当前时刻世界坐标系下的加速度值
     Eigen::Vector3d un_acc_1 = latest_Q * (linear_acceleration - latest_Ba) - g;
+    // 加速度中值积分的值(世界坐标系下)
     Eigen::Vector3d un_acc = 0.5 * (un_acc_0 + un_acc_1);
+    // 经典物理中位置，速度更新方程
     latest_P = latest_P + dt * latest_V + 0.5 * dt * dt * un_acc;
     latest_V = latest_V + dt * un_acc;
+    //当前加速度和陀螺仪值赋值成上一时刻的值，以便下次使用
     latest_acc_0 = linear_acceleration;
     latest_gyr_0 = angular_velocity;
 }
-
+// 用最新VIO结果更新最新imu对应的位姿
 void Estimator::updateLatestStates()
 {
     mPropagate.lock();
