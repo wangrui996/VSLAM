@@ -13,18 +13,6 @@ http://yun.realtimes.cn/   账号realtimes    密码realtimes2020
 ## 系统备份（配合）
 
 
-![2022-04-01 14-54-36 的屏幕截图](https://user-images.githubusercontent.com/58176267/161212118-5dec8029-7190-40b1-ae61-c5472ade0609.png)
-
-
-![2022-04-01 14-55-34 的屏幕截图](https://user-images.githubusercontent.com/58176267/161212129-229fbe39-ff46-4315-b3fc-8320e42e0a1b.png)
-
-
-
-
-
-
-
-
 ## cv_bridge重新安装  
 https://editor.csdn.net/md/?articleId=115000313  
 https://blog.csdn.net/fb_941219/article/details/105705759
