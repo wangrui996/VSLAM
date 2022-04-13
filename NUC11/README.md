@@ -24,3 +24,7 @@ sudo apt-mark hold linux-modules-extra-4.15.0-29-generic
 sudo apt-mark unhold linux-image-4.15.0-29-generic
 sudo apt-mark unhold linux-modules-extra-4.15.0-29-generic
 ```
+
+3.systemback备份  
+
+[systemback安装](https://blog.csdn.net/rechardchen123/article/details/90649208)  
