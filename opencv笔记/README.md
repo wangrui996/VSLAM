@@ -1,8 +1,6 @@
 
 ## opencv笔记  
-![1](https://user-images.githubusercontent.com/58176267/159611968-bd954eb1-47d7-4a26-9132-c527b072affc.jpg)
 
-![2](https://user-images.githubusercontent.com/58176267/159611971-884d3867-e82b-4990-bdb4-993049f1a97e.jpg)
 
 ### [opencv3.4.1官方文档](https://docs.opencv.org/3.4.1/d2/d75/namespacecv.html)
 
