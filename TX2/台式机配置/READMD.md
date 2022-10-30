@@ -6,6 +6,11 @@ https://mahongfei.com/1776.html
 https://github.com/Qv2ray/Qv2ray/releases  
 https://github.com/v2ray/v2ray-core/releases/  
 
+https://deepmind.t-salon.cc/article/5221
+https://www.xth8013.com/website/blogArticle/detail/182
+
+
+
 ##  Ubuntu终端配置代理
 用下面的方式下载ProxyChains 
 [ProxyChains](https://www.cnblogs.com/guguobao/p/8878109.html)  
